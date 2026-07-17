@@ -1,0 +1,68 @@
+---
+import "../styles/global.css";
+import { getLangFromUrl, useTranslations, stripLangFromPath } from "../i18n/utils";
+import { languages, defaultLang } from "../i18n/ui";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Path (without locale prefix) for canonical + hreflang, e.g. "/how-it-works". */
+  image?: string;
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const {
+  title = `${t("site.name")} — ${t("site.tagline")}`,
+  description = t("site.tagline"),
+  image = "/logo-mark.svg",
+} = Astro.props;
+
+const site = Astro.site ?? new URL("https://zyeth.work");
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL(image, site).href;
+
+// hreflang alternates: same page in every locale.
+const neutralPath = stripLangFromPath(Astro.url.pathname);
+const alternates = (Object.keys(languages) as Array<keyof typeof languages>).map((code) => {
+  const path = code === defaultLang ? neutralPath : `/${code}${neutralPath === "/" ? "" : neutralPath}`;
+  return { code, href: new URL(path, site).href };
+});
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    {alternates.map(({ code, href }) => <link rel="alternate" hreflang={code} href={href} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL(neutralPath, site).href} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={t("site.name")} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={lang === "es" ? "es_CO" : "en_US"} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,1 +1,90 @@
 @import "tailwindcss";
+
+/* Self-hosted fonts (no external calls) */
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+
+/*
+  Design system — see PLAN.md §3 + §3b.
+  Premium dark-green world; "curated" leads. Sentence-case headings.
+*/
+@theme {
+  /* Type families */
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand palette */
+  --color-brand-green: #124944;
+  --color-brand-green-dark: #0a2a25;
+  --color-brand-teal: #2bafa3;
+  --color-brand-lime: #88b33f;
+  --color-brand-gold: #f0c71d;
+
+  /* Green-biased neutrals (replace the template's flat grays) */
+  --color-surface: #f5f8f6;
+  --color-surface-dark: #0a2a25;
+  --color-ink: #0a2a25;
+  --color-muted: #5c6b66;
+  --color-near-white: #eef5f1;
+
+  /* Decorative gradients */
+  --gradient-band: linear-gradient(90deg, #124944, #2bafa3);
+  --gradient-bar: linear-gradient(90deg, #e1fab8, #cee12f, #136750);
+  --gradient-accent: linear-gradient(90deg, #88b33f, #2bafa3);
+}
+
+/* Base */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background-color: var(--color-surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+/* Eyebrow / label helper: uppercase, wide tracking */
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.8125rem;
+}
+
+/* Accessible focus ring across the whole site */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

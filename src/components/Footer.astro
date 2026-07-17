@@ -1,0 +1,66 @@
+---
+import { getLangFromUrl, useTranslations, localizePath } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+
+const exploreLinks = [
+  { href: localizePath("/", lang), label: t("nav.home") },
+  { href: localizePath("/how-it-works", lang), label: t("nav.howItWorks") },
+  { href: localizePath("/about", lang), label: t("nav.about") },
+  { href: localizePath("/careers", lang), label: t("nav.careers") },
+];
+---
+
+<footer class="bg-brand-green-dark text-near-white">
+  <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-3">
+    <!-- Brand + tagline -->
+    <div class="max-w-sm">
+      <div class="flex items-center gap-2.5">
+        <svg width="30" height="30" viewBox="0 0 125 125" fill="currentColor" class="text-brand-teal" aria-hidden="true">
+          <path d="M124.76 62.38C124.76 96.83 96.83 124.76 62.38 124.76C27.93 124.76 0 96.83 0 62.38C0 27.93 27.93 0 62.38 0C96.83 0 124.76 27.93 124.76 62.38ZM110.82 62.6C110.82 35.87 89.15 14.2 62.42 14.2C35.69 14.2 14.01 35.87 14.01 62.6C14.01 89.33 35.68 111 62.41 111C89.14 111 110.81 89.33 110.81 62.6H110.82Z" />
+          <path d="M50.43 85.07C56.6874 85.07 61.76 79.9974 61.76 73.74C61.76 67.4826 56.6874 62.41 50.43 62.41C44.1726 62.41 39.1 67.4826 39.1 73.74C39.1 79.9974 44.1726 85.07 50.43 85.07Z" />
+          <path d="M38.75 39.7V52.93H72.78V85.06H86.01V52.93V40.17V39.7H38.75Z" />
+        </svg>
+        <span class="font-[var(--font-display)] text-lg font-semibold">Zyeth</span>
+      </div>
+      <p class="mt-4 text-sm leading-relaxed text-near-white/70">{t("footer.tagline")}</p>
+    </div>
+
+    <!-- Explore -->
+    <nav aria-label={t("footer.explore")}>
+      <h2 class="eyebrow text-brand-teal">{t("footer.explore")}</h2>
+      <ul class="mt-4 space-y-2.5">
+        {
+          exploreLinks.map(({ href, label }) => (
+            <li>
+              <a href={href} class="text-sm text-near-white/70 transition-colors hover:text-near-white">
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <!-- Connect (placeholder contact — real data pending, see PLAN.md §7.7) -->
+    <div>
+      <h2 class="eyebrow text-brand-teal">{t("footer.connect")}</h2>
+      <ul class="mt-4 space-y-2.5 text-sm text-near-white/70">
+        <li><a href="mailto:hello@zyeth.work" class="transition-colors hover:text-near-white">hello@zyeth.work</a></li>
+        <li>Medellín, Colombia</li>
+        <li>US business hours</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- gradient bar accent -->
+  <div class="h-1 w-full" style="background: var(--gradient-bar);"></div>
+
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+    <p class="text-xs text-near-white/50">
+      © {year} {t("site.name")}. {t("footer.rights")}
+    </p>
+  </div>
+</footer>
