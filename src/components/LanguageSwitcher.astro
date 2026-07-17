@@ -1,0 +1,38 @@
+---
+import { getLangFromUrl, stripLangFromPath, useTranslations } from "../i18n/utils";
+import { languages, defaultLang } from "../i18n/ui";
+import type { Lang } from "../i18n/ui";
+
+const current = getLangFromUrl(Astro.url);
+const t = useTranslations(current);
+const neutralPath = stripLangFromPath(Astro.url.pathname);
+
+const links = (Object.keys(languages) as Lang[]).map((code) => ({
+  code,
+  label: code.toUpperCase(),
+  href: code === defaultLang ? neutralPath : `/${code}${neutralPath === "/" ? "" : neutralPath}`,
+  active: code === current,
+}));
+---
+
+<nav class="flex items-center gap-1 text-sm" aria-label={t("nav.langLabel")}>
+  {
+    links.map(({ code, label, href, active }, i) => (
+      <>
+        {i > 0 && <span aria-hidden="true" class="text-near-white/30">/</span>}
+        <a
+          href={href}
+          hreflang={code}
+          lang={code}
+          aria-current={active ? "true" : undefined}
+          class:list={[
+            "px-1 font-[var(--font-display)] font-semibold transition-colors",
+            active ? "text-brand-gold" : "text-near-white/60 hover:text-near-white",
+          ]}
+        >
+          {label}
+        </a>
+      </>
+    ))
+  }
+</nav>

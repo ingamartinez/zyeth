@@ -1,0 +1,130 @@
+---
+import { getLangFromUrl, useTranslations, localizePath } from "../i18n/utils";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import Button from "./Button.astro";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const home = localizePath("/", lang);
+
+const primaryLinks = [
+  { href: localizePath("/", lang), label: t("nav.home") },
+  { href: localizePath("/how-it-works", lang), label: t("nav.howItWorks") },
+];
+
+const resourceLinks = [
+  { href: localizePath("/about", lang), label: t("nav.about") },
+  { href: localizePath("/careers", lang), label: t("nav.careers") },
+];
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === home ? currentPath === home : currentPath.startsWith(href);
+---
+
+<header class="sticky top-0 z-50 bg-brand-green-dark/95 backdrop-blur supports-[backdrop-filter]:bg-brand-green-dark/80 text-near-white">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <!-- Brand: Evōps mark (currentColor) + Zyeth wordmark -->
+    <a href={home} class="flex items-center gap-2.5" aria-label={t("site.name")}>
+      <svg width="32" height="32" viewBox="0 0 125 125" fill="currentColor" class="text-brand-teal" aria-hidden="true">
+        <path d="M124.76 62.38C124.76 96.83 96.83 124.76 62.38 124.76C27.93 124.76 0 96.83 0 62.38C0 27.93 27.93 0 62.38 0C96.83 0 124.76 27.93 124.76 62.38ZM110.82 62.6C110.82 35.87 89.15 14.2 62.42 14.2C35.69 14.2 14.01 35.87 14.01 62.6C14.01 89.33 35.68 111 62.41 111C89.14 111 110.81 89.33 110.81 62.6H110.82Z" />
+        <path d="M50.43 85.07C56.6874 85.07 61.76 79.9974 61.76 73.74C61.76 67.4826 56.6874 62.41 50.43 62.41C44.1726 62.41 39.1 67.4826 39.1 73.74C39.1 79.9974 44.1726 85.07 50.43 85.07Z" />
+        <path d="M38.75 39.7V52.93H72.78V85.06H86.01V52.93V40.17V39.7H38.75Z" />
+      </svg>
+      <span class="font-[var(--font-display)] text-xl font-semibold tracking-tight">Zyeth</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden items-center gap-1 lg:flex" aria-label="Primary">
+      {
+        primaryLinks.map(({ href, label }) => (
+          <a
+            href={href}
+            aria-current={isActive(href) ? "page" : undefined}
+            class:list={[
+              "rounded-full px-3 py-2 text-sm font-medium transition-colors",
+              isActive(href) ? "text-brand-gold" : "text-near-white/80 hover:text-near-white",
+            ]}
+          >
+            {label}
+          </a>
+        ))
+      }
+
+      <!-- Resources dropdown (hover + keyboard focus, no JS) -->
+      <div class="group relative">
+        <button
+          type="button"
+          class="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-near-white/80 transition-colors hover:text-near-white group-focus-within:text-near-white"
+          aria-haspopup="true"
+        >
+          {t("nav.resources")}
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div
+          class="invisible absolute left-0 top-full min-w-44 translate-y-1 rounded-2xl border border-white/10 bg-brand-green-dark p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+        >
+          {
+            resourceLinks.map(({ href, label }) => (
+              <a
+                href={href}
+                class="block rounded-xl px-3 py-2 text-sm text-near-white/80 transition-colors hover:bg-white/5 hover:text-near-white"
+              >
+                {label}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </nav>
+
+    <!-- Right cluster -->
+    <div class="hidden items-center gap-4 lg:flex">
+      <LanguageSwitcher />
+      <Button href={localizePath("/#contact", lang)} variant="primary" size="md">
+        {t("nav.cta")}
+      </Button>
+    </div>
+
+    <!-- Mobile menu (native disclosure, no JS) -->
+    <details class="group relative lg:hidden">
+      <summary
+        class="flex cursor-pointer list-none items-center rounded-full p-2 text-near-white/90 [&::-webkit-details-marker]:hidden"
+        aria-label={t("nav.menu")}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path class="group-open:hidden" d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <path class="hidden group-open:block" d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </summary>
+      <div class="absolute right-0 top-full mt-2 w-64 rounded-2xl border border-white/10 bg-brand-green-dark p-3 shadow-xl">
+        <nav class="flex flex-col" aria-label="Mobile">
+          {
+            [...primaryLinks, ...resourceLinks].map(({ href, label }) => (
+              <a
+                href={href}
+                aria-current={isActive(href) ? "page" : undefined}
+                class:list={[
+                  "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive(href) ? "text-brand-gold" : "text-near-white/80 hover:bg-white/5 hover:text-near-white",
+                ]}
+              >
+                {label}
+              </a>
+            ))
+          }
+          <div class="my-2 border-t border-white/10"></div>
+          <div class="flex items-center justify-between px-3 py-1">
+            <LanguageSwitcher />
+          </div>
+          <Button href={localizePath("/#contact", lang)} variant="primary" size="md" class="mt-2 w-full">
+            {t("nav.cta")}
+          </Button>
+        </nav>
+      </div>
+    </details>
+  </div>
+</header>
