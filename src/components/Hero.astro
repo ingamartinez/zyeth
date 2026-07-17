@@ -1,0 +1,590 @@
+---
+import { getLangFromUrl, useTranslations, localizePath } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const bookACall = localizePath("/#contact", lang);
+const howItWorks = localizePath("/how-it-works", lang);
+
+// Monogram from the example candidate's name (e.g. "Valentina R." -> "VR").
+const initials = t("hero.card.name")
+  .split(" ")
+  .map((part) => part.charAt(0))
+  .join("")
+  .replace(/[^A-Za-zÀ-ÿ]/g, "")
+  .slice(0, 2)
+  .toUpperCase();
+
+const trust = [
+  t("hero.trustTimezone"),
+  t("hero.trustVetted"),
+  t("hero.trustMonths"),
+];
+
+const chips = [
+  t("hero.card.chipEnglish"),
+  t("hero.card.chipExperience"),
+  t("hero.card.chipTools"),
+];
+---
+
+<section class="hero">
+  <div class="hero-wrap mx-auto max-w-7xl px-4 sm:px-6">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="hero-eyebrow reveal d1">{t("hero.eyebrow")}</p>
+        <h1 class="hero-h1 reveal d2">
+          {t("hero.h1Before")}<span class="hl">{t("hero.h1Highlight")}</span>{t("hero.h1After")}
+        </h1>
+        <p class="hero-sub reveal d3">
+          {t("hero.subBefore")}<b>{t("hero.subStrong")}</b>{t("hero.subAfter")}
+        </p>
+        <div class="hero-cta reveal d4">
+          <a class="hero-btn" href={bookACall}>{t("nav.cta")}</a>
+          <a class="hero-btn hero-btn-ghost" href={howItWorks}>
+            {t("hero.ctaSecondary")}
+          </a>
+        </div>
+        <ul class="hero-trust reveal d5">
+          {
+            trust.map((item) => (
+              <li>
+                <svg class="tick" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="10" cy="10" r="9" fill="rgba(43,175,163,.18)" />
+                  <path d="M6 10.5l2.4 2.4L14 7.5" stroke="var(--color-brand-teal)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                {item}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="hero-stage">
+        <svg class="rings" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+          <circle cx="200" cy="200" r="70" stroke="rgba(255,255,255,.10)" />
+          <circle cx="200" cy="200" r="120" stroke="rgba(255,255,255,.08)" />
+          <circle cx="200" cy="200" r="170" stroke="rgba(255,255,255,.06)" />
+          <circle cx="200" cy="200" r="198" stroke="rgba(154,203,63,.10)" />
+        </svg>
+        <div class="ghost" aria-hidden="true"></div>
+
+        <article class="card" aria-label={t("hero.card.aria")}>
+          <div class="card-top">
+            <span class="pill">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3l2.5 5.3 5.8.8-4.2 4 1 5.8L12 22l-5.9-3.1 1-5.8-4.2-4 5.8-.8z" fill="var(--color-brand-green)" />
+              </svg>
+              {t("hero.card.pick")}
+            </span>
+            <span class="verified">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2l2.2 1.5 2.6-.3 1.2 2.4 2.3 1.3-.4 2.6L21 12l-1.3 2.2.4 2.6-2.3 1.3-1.2 2.4-2.6-.3L12 22l-2.2-1.5-2.6.3-1.2-2.4L3.7 17l.4-2.6L3 12l1.1-2.2-.4-2.6L6 5.9l1.2-2.4 2.6.3z" fill="var(--color-brand-teal)" />
+                <path d="M8.5 12l2.2 2.2L15.5 9.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              {t("hero.card.verified")}
+            </span>
+          </div>
+
+          <div class="person">
+            <span class="avatar" aria-hidden="true">{initials}</span>
+            <div>
+              <p class="name">{t("hero.card.name")}</p>
+              <p class="role">{t("hero.card.role")}</p>
+              <p class="loc">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="currentColor" stroke-width="1.6" />
+                  <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.6" />
+                </svg>
+                {t("hero.card.location")}
+              </p>
+            </div>
+          </div>
+
+          <div class="chips">
+            {chips.map((chip) => <span class="chip">{chip}</span>)}
+            <span class="chip live">
+              <i class="dot"></i>{t("hero.card.chipAvailable")}
+            </span>
+          </div>
+
+          <div class="rate">
+            <div class="rate-head">
+              <span>{t("hero.card.rateHead")}</span>
+              <span class="save">{t("hero.card.save")}</span>
+            </div>
+            <div class="bars">
+              <div class="bar-row">
+                <span class="bar-lab">{t("hero.card.barUsLabel")}</span>
+                <span class="bar us"><i></i></span>
+                <span class="bar-val us">{t("hero.card.barUsValue")}</span>
+              </div>
+              <div class="bar-row">
+                <span class="bar-lab">{t("hero.card.barZyethLabel")}</span>
+                <span class="bar mde"><i></i></span>
+                <span class="bar-val">{t("hero.card.barZyethValue")}</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <p class="hero-footnote reveal d5">
+      {t("hero.footnote")}{" "}
+      <span class="footnote-example">{t("hero.footnoteExample")}</span>
+    </p>
+  </div>
+</section>
+
+<style>
+  .hero {
+    /* Hero-local deep-green world, derived from the brand palette. */
+    --ground: #08221e;
+    --ground-2: #0c2c27;
+    --ink: var(--color-near-white);
+    --ink-mute: #9db3ab;
+    --panel: #ffffff;
+    --panel-ink: #0c2c27;
+    --panel-mute: var(--color-muted);
+    --line: rgba(255, 255, 255, 0.1);
+    --line-2: rgba(255, 255, 255, 0.16);
+
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 700px at 78% -10%, rgba(43, 175, 163, 0.2), transparent 60%),
+      radial-gradient(900px 600px at 0% 110%, rgba(154, 203, 63, 0.12), transparent 55%),
+      linear-gradient(160deg, var(--ground) 0%, var(--ground-2) 55%, var(--color-brand-green-dark) 100%);
+    overflow-x: clip;
+  }
+
+  .hero-wrap {
+    padding-top: 56px;
+    padding-bottom: 84px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  /* ---------- copy ---------- */
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-brand-teal);
+    margin-bottom: 22px;
+  }
+  .hero-eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 1.5px;
+    background: linear-gradient(90deg, var(--color-brand-teal), transparent);
+  }
+
+  .hero-h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.375rem, 5vw, 3.875rem);
+    line-height: 1.03;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 22px;
+    color: var(--ink);
+  }
+  .hero-h1 .hl {
+    position: relative;
+    white-space: nowrap;
+    color: #fff;
+  }
+  .hero-h1 .hl::after {
+    content: "";
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    bottom: 0.04em;
+    height: 0.3em;
+    background: linear-gradient(90deg, var(--color-brand-lime), var(--color-brand-teal));
+    border-radius: 3px;
+    z-index: -1;
+    opacity: 0.9;
+    transform: skewX(-6deg);
+  }
+
+  .hero-sub {
+    font-size: 1.09rem;
+    line-height: 1.62;
+    color: var(--ink-mute);
+    max-width: 34em;
+    margin: 0 0 30px;
+  }
+  .hero-sub b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 34px;
+  }
+  .hero-btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.97rem;
+    border: 0;
+    cursor: pointer;
+    border-radius: 11px;
+    padding: 14px 24px;
+    color: #06231f;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: linear-gradient(135deg, var(--color-brand-teal), var(--color-brand-lime));
+    box-shadow: 0 10px 26px -12px rgba(43, 175, 163, 0.8);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .hero-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -12px rgba(43, 175, 163, 0.9);
+  }
+  .hero-btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line-2);
+    box-shadow: none;
+  }
+  .hero-btn-ghost:hover {
+    border-color: var(--ink);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-2px);
+  }
+
+  .hero-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    padding-top: 26px;
+    margin: 0;
+    border-top: 1px solid var(--line);
+    list-style: none;
+  }
+  .hero-trust li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.84rem;
+    color: var(--ink-mute);
+  }
+  .tick {
+    width: 17px;
+    height: 17px;
+    flex: none;
+  }
+
+  /* ---------- candidate card ---------- */
+  .hero-stage {
+    position: relative;
+  }
+  .rings {
+    position: absolute;
+    inset: -14% -10% -14% -6%;
+    z-index: 0;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .ghost {
+    position: absolute;
+    inset: 8% -4% -8% 14%;
+    z-index: 1;
+    background: #0f352f;
+    border: 1px solid var(--line-2);
+    border-radius: 22px;
+    transform: rotate(4deg);
+  }
+  .card {
+    position: relative;
+    z-index: 2;
+    background: var(--panel);
+    color: var(--panel-ink);
+    border-radius: 22px;
+    padding: 22px;
+    max-width: 400px;
+    margin-left: auto;
+    box-shadow:
+      0 40px 80px -30px rgba(0, 0, 0, 0.65),
+      0 2px 0 rgba(255, 255, 255, 0.4) inset;
+  }
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brand-green);
+    background: #eaf5e6;
+    border: 1px solid #d3e9c8;
+    padding: 5px 10px 5px 8px;
+    border-radius: 999px;
+  }
+  .pill svg {
+    width: 13px;
+    height: 13px;
+  }
+  .verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-brand-teal);
+  }
+  .verified svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .person {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .avatar {
+    width: 66px;
+    height: 66px;
+    border-radius: 16px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.375rem;
+    letter-spacing: 0.02em;
+    color: #06231f;
+    background: linear-gradient(135deg, var(--color-brand-teal), var(--color-brand-lime));
+  }
+  .name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1875rem;
+    margin: 0 0 2px;
+    letter-spacing: -0.01em;
+  }
+  .role {
+    font-size: 0.875rem;
+    color: var(--panel-mute);
+    margin: 0;
+  }
+  .loc {
+    font-size: 0.78rem;
+    color: var(--panel-mute);
+    margin: 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 18px;
+  }
+  .chip {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-brand-green);
+    background: #f1f5f0;
+    border-radius: 8px;
+    padding: 5px 9px;
+  }
+  .chip.live {
+    color: #3f7d2e;
+    background: #ecf6e4;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #5aa72f;
+    box-shadow: 0 0 0 3px rgba(90, 167, 47, 0.22);
+  }
+
+  .rate {
+    background: #f6f8f5;
+    border: 1px solid #e7ede4;
+    border-radius: 15px;
+    padding: 14px 15px;
+  }
+  .rate-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 11px;
+  }
+  .rate-head > span:first-child {
+    font-size: 0.75rem;
+    color: var(--panel-mute);
+    font-weight: 500;
+  }
+  .save {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: #3f7d2e;
+    background: #e4f3d8;
+    padding: 3px 8px;
+    border-radius: 7px;
+    white-space: nowrap;
+  }
+  .bars {
+    display: grid;
+    gap: 9px;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 68px 1fr auto;
+    align-items: center;
+    gap: 11px;
+  }
+  .bar-lab {
+    font-size: 0.75rem;
+    color: var(--panel-mute);
+    font-weight: 500;
+  }
+  .bar {
+    height: 9px;
+    border-radius: 999px;
+    background: #e7ede4;
+    overflow: hidden;
+  }
+  .bar i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+  }
+  .bar.us i {
+    width: 100%;
+    background: #c2ccc4;
+  }
+  .bar.mde i {
+    width: 43%;
+    background: linear-gradient(90deg, var(--color-brand-teal), var(--color-brand-lime));
+  }
+  .bar-val {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.84rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .bar-val.us {
+    color: var(--panel-mute);
+  }
+
+  .hero-footnote {
+    margin: 34px 0 0;
+    font-size: 0.78rem;
+    color: var(--ink-mute);
+    text-align: center;
+  }
+  .footnote-example {
+    color: var(--color-brand-gold);
+  }
+
+  /* ---------- motion ---------- */
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes hero-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(22px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .reveal {
+    opacity: 0;
+    animation: hero-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+  .d1 {
+    animation-delay: 0.05s;
+  }
+  .d2 {
+    animation-delay: 0.15s;
+  }
+  .d3 {
+    animation-delay: 0.25s;
+  }
+  .d4 {
+    animation-delay: 0.35s;
+  }
+  .d5 {
+    animation-delay: 0.45s;
+  }
+  .hero-stage .card {
+    opacity: 0;
+    animation: hero-card-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .hero-stage .card {
+      animation: none;
+      opacity: 1;
+    }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 44px;
+    }
+    .hero-wrap {
+      padding-top: 40px;
+      padding-bottom: 60px;
+    }
+    .card {
+      margin: 0 auto;
+    }
+    .ghost {
+      inset: 6% 6% -6% 6%;
+    }
+  }
+</style>
