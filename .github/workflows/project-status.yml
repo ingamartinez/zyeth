@@ -1,15 +1,25 @@
 name: Project status sync
 
-# Moves the issues linked to a merged PR across the Zyeth board:
-#   push to staging -> "In Staging" (shipped to staging, pending client approval)
-#   push to main    -> "Done"       (approved and shipped to production)
+# Keeps the Zyeth board (project #2, "Zyeth — Build") in sync with reality:
+#   branch req-<N> created / PR opened -> "In Progress"
+#   push to staging                    -> "In Staging" (pending client approval)
+#   push to main                       -> "Done"        (approved, in production)
 #
-# Linked issues are read from each merged PR's "closing issues" (the ones the
-# PR body references with a keyword like "Closes #4"). Requires a PAT with
-# Projects write access stored as the PROJECT_TOKEN secret — the default
-# GITHUB_TOKEN cannot write to user-owned Projects.
+# Linked issues are read by PARSING closing keywords ("Closes #5", "Fixes #5",
+# "Resolves #5") from the PR body/title — NOT from GitHub's
+# closingIssuesReferences, which stays EMPTY when a PR targets a non-default
+# branch (our feature PRs target `staging`, so that connection never populates).
+#
+# A status-rank guard prevents moving an issue backwards (e.g. a late PR event
+# must not drag an "In Staging" issue back to "In Progress").
+#
+# Requires a PAT with Projects write access as the PROJECT_TOKEN secret — the
+# default GITHUB_TOKEN cannot write user-owned Projects.
 
 on:
+  create:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
   push:
     branches: [staging, main]
 
@@ -25,10 +35,49 @@ jobs:
             const PROJECT_NUMBER = 2;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const targetStatus =
-              context.ref === 'refs/heads/main' ? 'Done' : 'In Staging';
 
-            // 1. Resolve project + Status field + target option id (by name).
+            // Status order — used to never move an issue backwards.
+            const RANK = { 'Todo': 0, 'In Progress': 1, 'In Staging': 2, 'Done': 3 };
+
+            // Extract issue numbers from closing keywords in free text.
+            const issueNumbers = new Set();
+            const parseClosingIssues = (text) => {
+              if (!text) return;
+              const re = /\b(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+#(\d+)/gi;
+              let m;
+              while ((m = re.exec(text)) !== null) issueNumbers.add(Number(m[1]));
+            };
+
+            // 1. Decide the target status and collect issues, per event type.
+            let targetStatus;
+            if (context.eventName === 'push') {
+              targetStatus = context.ref === 'refs/heads/main' ? 'Done' : 'In Staging';
+              const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner, repo, commit_sha: context.sha,
+              });
+              for (const pr of prs.data) {
+                parseClosingIssues(pr.body);
+                parseClosingIssues(pr.title);
+              }
+            } else if (context.eventName === 'pull_request') {
+              targetStatus = 'In Progress';
+              parseClosingIssues(context.payload.pull_request.body);
+              parseClosingIssues(context.payload.pull_request.title);
+            } else if (context.eventName === 'create' && context.payload.ref_type === 'branch') {
+              targetStatus = 'In Progress';
+              const m = /req-(\d+)/i.exec(context.payload.ref || '');
+              if (m) issueNumbers.add(Number(m[1]));
+            } else {
+              core.info(`Event "${context.eventName}" not handled — skipping.`);
+              return;
+            }
+
+            if (issueNumbers.size === 0) {
+              core.info('No linked issues found for this event — nothing to move.');
+              return;
+            }
+
+            // 2. Resolve project + Status field + target option id (by name).
             const projQ = await github.graphql(
               `query($owner:String!, $number:Int!) {
                  user(login:$owner) {
@@ -50,52 +99,48 @@ jobs:
               return;
             }
 
-            // 2. Find PRs associated with the pushed head commit.
-            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner, repo, commit_sha: context.sha,
-            });
-
-            // 3. Collect the issues those PRs close.
-            const issueNumbers = new Set();
-            for (const pr of prs.data) {
-              const res = await github.graphql(
-                `query($owner:String!, $repo:String!, $pr:Int!) {
-                   repository(owner:$owner, name:$repo) {
-                     pullRequest(number:$pr) {
-                       closingIssuesReferences(first:50) { nodes { number } }
-                     }
-                   }
-                 }`,
-                { owner, repo, pr: pr.number }
-              );
-              for (const n of res.repository.pullRequest.closingIssuesReferences.nodes) {
-                issueNumbers.add(n.number);
-              }
-            }
-
-            if (issueNumbers.size === 0) {
-              core.info('No linked issues found for this push — nothing to move.');
-              return;
-            }
-
-            // 4. For each issue, find its item on this project and set the status.
+            // 3. For each issue, find its item on this project and set the status.
             for (const number of issueNumbers) {
               const itemQ = await github.graphql(
                 `query($owner:String!, $repo:String!, $number:Int!) {
                    repository(owner:$owner, name:$repo) {
                      issue(number:$number) {
-                       projectItems(first:20) { nodes { id project { number } } }
+                       projectItems(first:20) {
+                         nodes {
+                           id
+                           project { number }
+                           fieldValueByName(name:"Status") {
+                             ... on ProjectV2ItemFieldSingleSelectValue { name }
+                           }
+                         }
+                       }
                      }
                    }
                  }`,
                 { owner, repo, number }
               );
-              const item = itemQ.repository.issue.projectItems.nodes
+              const issue = itemQ.repository.issue;
+              if (!issue) {
+                core.info(`#${number} is not an issue (likely a PR) — skipping.`);
+                continue;
+              }
+              const item = issue.projectItems.nodes
                 .find(n => n.project.number === PROJECT_NUMBER);
               if (!item) {
                 core.info(`Issue #${number} is not on project #${PROJECT_NUMBER} — skipping.`);
                 continue;
               }
+
+              const current = item.fieldValueByName?.name;
+              if (current === targetStatus) {
+                core.info(`Issue #${number} already "${targetStatus}" — skipping.`);
+                continue;
+              }
+              if (current && RANK[current] > RANK[targetStatus]) {
+                core.info(`Issue #${number} is "${current}" — not moving back to "${targetStatus}".`);
+                continue;
+              }
+
               await github.graphql(
                 `mutation($project:ID!, $item:ID!, $field:ID!, $option:String!) {
                    updateProjectV2ItemFieldValue(input:{
@@ -105,5 +150,5 @@ jobs:
                  }`,
                 { project: project.id, item: item.id, field: fieldId, option: option.id }
               );
-              core.info(`Issue #${number} -> ${targetStatus}`);
+              core.info(`Issue #${number}: ${current ?? '(none)'} -> ${targetStatus}`);
             }
