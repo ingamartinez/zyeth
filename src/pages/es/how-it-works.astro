@@ -1,0 +1,33 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Nav from "../../components/Nav.astro";
+import PageHero from "../../components/PageHero.astro";
+import Stepper from "../../components/Stepper.astro";
+import ModelExplainer from "../../components/ModelExplainer.astro";
+import Comparison from "../../components/Comparison.astro";
+import CtaBand from "../../components/CtaBand.astro";
+import Footer from "../../components/Footer.astro";
+import { useTranslations, getLangFromUrl } from "../../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<Layout
+  title={`${t("site.name")} — ${t("howitworks.meta.title")}`}
+  description={t("howitworks.meta.description")}
+>
+  <Nav />
+  <main>
+    <PageHero
+      eyebrowKey="howitworks.hero.eyebrow"
+      headingKey="howitworks.hero.h1"
+      subtitleKey="howitworks.hero.subtitle"
+    />
+    <Stepper />
+    <ModelExplainer />
+    <Comparison />
+    <CtaBand />
+  </main>
+  <Footer />
+</Layout>
