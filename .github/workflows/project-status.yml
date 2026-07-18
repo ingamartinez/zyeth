@@ -1,0 +1,109 @@
+name: Project status sync
+
+# Moves the issues linked to a merged PR across the Zyeth board:
+#   push to staging -> "In Staging" (shipped to staging, pending client approval)
+#   push to main    -> "Done"       (approved and shipped to production)
+#
+# Linked issues are read from each merged PR's "closing issues" (the ones the
+# PR body references with a keyword like "Closes #4"). Requires a PAT with
+# Projects write access stored as the PROJECT_TOKEN secret — the default
+# GITHUB_TOKEN cannot write to user-owned Projects.
+
+on:
+  push:
+    branches: [staging, main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move linked issues to the branch's status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const PROJECT_NUMBER = 2;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const targetStatus =
+              context.ref === 'refs/heads/main' ? 'Done' : 'In Staging';
+
+            // 1. Resolve project + Status field + target option id (by name).
+            const projQ = await github.graphql(
+              `query($owner:String!, $number:Int!) {
+                 user(login:$owner) {
+                   projectV2(number:$number) {
+                     id
+                     field(name:"Status") {
+                       ... on ProjectV2SingleSelectField { id options { id name } }
+                     }
+                   }
+                 }
+               }`,
+              { owner, number: PROJECT_NUMBER }
+            );
+            const project = projQ.user.projectV2;
+            const fieldId = project.field.id;
+            const option = project.field.options.find(o => o.name === targetStatus);
+            if (!option) {
+              core.setFailed(`Status option "${targetStatus}" not found on the board`);
+              return;
+            }
+
+            // 2. Find PRs associated with the pushed head commit.
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner, repo, commit_sha: context.sha,
+            });
+
+            // 3. Collect the issues those PRs close.
+            const issueNumbers = new Set();
+            for (const pr of prs.data) {
+              const res = await github.graphql(
+                `query($owner:String!, $repo:String!, $pr:Int!) {
+                   repository(owner:$owner, name:$repo) {
+                     pullRequest(number:$pr) {
+                       closingIssuesReferences(first:50) { nodes { number } }
+                     }
+                   }
+                 }`,
+                { owner, repo, pr: pr.number }
+              );
+              for (const n of res.repository.pullRequest.closingIssuesReferences.nodes) {
+                issueNumbers.add(n.number);
+              }
+            }
+
+            if (issueNumbers.size === 0) {
+              core.info('No linked issues found for this push — nothing to move.');
+              return;
+            }
+
+            // 4. For each issue, find its item on this project and set the status.
+            for (const number of issueNumbers) {
+              const itemQ = await github.graphql(
+                `query($owner:String!, $repo:String!, $number:Int!) {
+                   repository(owner:$owner, name:$repo) {
+                     issue(number:$number) {
+                       projectItems(first:20) { nodes { id project { number } } }
+                     }
+                   }
+                 }`,
+                { owner, repo, number }
+              );
+              const item = itemQ.repository.issue.projectItems.nodes
+                .find(n => n.project.number === PROJECT_NUMBER);
+              if (!item) {
+                core.info(`Issue #${number} is not on project #${PROJECT_NUMBER} — skipping.`);
+                continue;
+              }
+              await github.graphql(
+                `mutation($project:ID!, $item:ID!, $field:ID!, $option:String!) {
+                   updateProjectV2ItemFieldValue(input:{
+                     projectId:$project, itemId:$item, fieldId:$field,
+                     value:{ singleSelectOptionId:$option }
+                   }) { projectV2Item { id } }
+                 }`,
+                { project: project.id, item: item.id, field: fieldId, option: option.id }
+              );
+              core.info(`Issue #${number} -> ${targetStatus}`);
+            }
