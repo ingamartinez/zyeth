@@ -21,6 +21,7 @@ if (Astro.request.method === 'POST') {
   const ip = getClientIp(Astro.request, Astro.clientAddress);
 
   if (!checkLoginRateLimit(ip)) {
+    Astro.response.status = 429;
     error = 'Too many attempts. Please try again later.';
   } else {
     const form = await Astro.request.formData();

@@ -11,17 +11,25 @@ import type { AstroCookies } from 'astro';
 // routes need their own CSRF story instead, scoped to just those routes.
 const CSRF_COOKIE = 'csrf_token';
 
-function isProd(): boolean {
-  return process.env.NODE_ENV === 'production';
-}
-
 // Returns the existing CSRF token from the cookie, or mints and sets a
 // new one. Call this when rendering any admin form (GET) so the hidden
-// field and the cookie start in sync. Not httpOnly — the whole point of
-// the double-submit pattern is that the form can read and echo it back;
-// the security property comes from an attacker's cross-site form being
-// unable to read this cookie's value to include it, not from hiding it
-// from same-origin JS/markup.
+// field and the cookie start in sync.
+//
+// httpOnly: true — no client JS ever needs to read this cookie. The
+// token is embedded into the form server-side, in the .astro frontmatter
+// (via Astro.cookies.get()/ensureCsrfToken() at render time), and echoed
+// back as a hidden form field. The double-submit security property comes
+// from an attacker's cross-site form being unable to READ this cookie's
+// value to include it as the matching field — httpOnly only makes that
+// stronger (also unreadable to same-origin XSS), it doesn't break the
+// pattern.
+//
+// secure: `import.meta.env.PROD` — see lib/session.ts for why this is
+// fail-secure by construction (true in any real build, false only under
+// `astro dev`).
+//
+// path: '/admin' — scoped so this token is never sent on public /api/*
+// requests.
 export function ensureCsrfToken(cookies: AstroCookies): string {
   const existing = cookies.get(CSRF_COOKIE)?.value;
   if (existing) {
@@ -29,9 +37,9 @@ export function ensureCsrfToken(cookies: AstroCookies): string {
   }
   const token = crypto.randomBytes(32).toString('base64url');
   cookies.set(CSRF_COOKIE, token, {
-    path: '/',
-    httpOnly: false,
-    secure: isProd(),
+    path: '/admin',
+    httpOnly: true,
+    secure: import.meta.env.PROD,
     sameSite: 'lax',
   });
   return token;

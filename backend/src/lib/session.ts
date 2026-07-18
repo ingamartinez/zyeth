@@ -15,10 +15,6 @@ const SESSION_COOKIE = 'session';
 // TTL + explicit long-lived opt-in) or if #30's DoD is extended.
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-function isProd(): boolean {
-  return process.env.NODE_ENV === 'production';
-}
-
 function newToken(): string {
   return crypto.randomBytes(32).toString('base64url');
 }
@@ -29,22 +25,26 @@ function newToken(): string {
 // Cookie flags:
 // - httpOnly: client JS can never read this cookie (mitigates token theft
 //   via XSS).
-// - secure: only in production — `astro dev` over plain http in local
-//   dev would silently drop a `secure` cookie otherwise, breaking login
-//   locally. Staging/prod are always served over https.
+// - secure: `import.meta.env.PROD` — true in any real Astro build (the
+//   deployed SSR server), false only under `astro dev`. This is
+//   fail-secure by construction: it needs no manually-provisioned env var
+//   (unlike gating on `process.env.NODE_ENV`, which silently defaults to
+//   insecure if nothing ever sets NODE_ENV on the deployed process).
 // - sameSite: 'lax' — sent on top-level navigations (so the post-login
 //   redirect and normal link navigation work) but withheld from
 //   cross-site subrequests, which is the CSRF-relevant protection at the
 //   cookie level; the double-submit token (lib/csrf.ts) covers the
 //   same-site-but-cross-origin-form gap sameSite=lax doesn't.
+// - path: '/admin' — scoped so this token is never sent on public
+//   /api/* requests.
 export async function createSession(cookies: AstroCookies, userId: string): Promise<string> {
   const token = newToken();
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
   await db.insert(sessions).values({ id: token, userId, expiresAt });
   cookies.set(SESSION_COOKIE, token, {
-    path: '/',
+    path: '/admin',
     httpOnly: true,
-    secure: isProd(),
+    secure: import.meta.env.PROD,
     sameSite: 'lax',
     expires: expiresAt,
   });
@@ -91,5 +91,5 @@ export async function destroySession(cookies: AstroCookies): Promise<void> {
   if (token) {
     await db.delete(sessions).where(eq(sessions.id, token));
   }
-  cookies.delete(SESSION_COOKIE, { path: '/' });
+  cookies.delete(SESSION_COOKIE, { path: '/admin' });
 }
