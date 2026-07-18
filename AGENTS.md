@@ -49,6 +49,14 @@ umbrella issue):
 3. **Fetch before branching.** After `gh pr merge`, the local `origin/staging` ref is stale. Run
    `git fetch origin` BEFORE `git checkout -b <next> origin/staging`, or you branch off the
    pre-merge state and lose the just-merged work.
+4. **Issues stay OPEN until the change reaches `main`.** Merging an issue's PR to `staging` does NOT
+   close its issue — the work is integrated, not shipped to production. The issue (and its checkbox in
+   the epic body) remains OPEN while the code lives only in `staging`. It closes only when the change
+   is promoted to `main` (production). This is also how GitHub behaves: `Closes #<issue>` auto-closes
+   only when the PR merges into the repo's **default branch** (`main`), so a PR merged to `staging`
+   with `Closes #<issue>` in its body links the issue but leaves it open until `main` catches up.
+   Do NOT manually close staging-merged issues — an open issue with a merged staging PR is the
+   correct, expected state.
 
 ## Branch naming
 
@@ -85,7 +93,9 @@ NEVER add `Co-Authored-By` or AI attribution lines.
 
 - **Base branch is `staging`** — NOT `main`. `main` is production; `staging` is the integration line.
 - Title: same as the closing commit.
-- Body must include `Closes #<issue>` so the issue auto-closes on merge.
+- Body must include `Closes #<issue>` so the issue is linked and auto-closes **once the change reaches
+  `main`** (the default branch). A PR merged to `staging` links the issue but leaves it OPEN — see
+  § Epic workflow rule 4. This is expected, not a bug.
 - Self-review checklist: build passes, backend `astro check` passes (if backend touched), manual
   smoke test described, live-staging verification for UI changes.
 - **Squash merge by default** — keeps history linear.

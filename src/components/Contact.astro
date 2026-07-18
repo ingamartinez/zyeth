@@ -86,6 +86,18 @@ const calendlyUrl = "https://calendly.com/ing-amartinez94/30min";
           />
         </div>
 
+        <!-- Honeypot: real users never see or fill this. See backend/src/lib/validation.ts. -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="contact-company">{t("honeypot.label")}</label>
+          <input
+            id="contact-company"
+            name="company"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
         <div class="field-submit">
           <button type="submit" class="contact-btn">{t("contact.submit")}</button>
           <p class="contact-note">{t("contact.note")}</p>
@@ -226,6 +238,19 @@ const calendlyUrl = "https://calendly.com/ing-amartinez94/30min";
     margin: 0;
   }
 
+  /* ---------- honeypot: visually hidden, never display:none/hidden ---------- */
+  .hp-field {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   /* ---------- motion ---------- */
   .reveal {
     opacity: 0;
@@ -292,6 +317,50 @@ const calendlyUrl = "https://calendly.com/ing-amartinez94/30min";
         { threshold: 0.15 },
       );
       items.forEach((el) => io.observe(el));
+    }
+
+    // ---------- dual-capture: fire-and-forget POST to /api/leads ----------
+    // This form's REAL success is the Calendly navigation below (native GET
+    // submit, target="_blank") — that must ALWAYS proceed. This listener
+    // never calls preventDefault and never throws; it just also persists
+    // the lead on our own backend, best-effort, alongside the existing
+    // Calendly redirect. See issue #29.
+    const form = section.querySelector<HTMLFormElement>(".contact-form");
+    if (form) {
+      form.addEventListener("submit", () => {
+        const apiBase = import.meta.env.PUBLIC_API_BASE_URL;
+        // Backend isn't deployed yet (#33/#34 open) — no live URL to POST
+        // to. Skip entirely rather than attempting a request to a
+        // nonexistent origin, which would surface console errors.
+        if (!apiBase) return;
+
+        try {
+          const data = new FormData(form);
+          // CRITICAL: the form field is named "rate", but the backend's
+          // leadSchema expects "expectedRate" — remap explicitly rather
+          // than naively spreading FormData into JSON (that would send
+          // "rate" and fail schema validation with a silent 400).
+          const payload = {
+            name: String(data.get("name") ?? ""),
+            email: String(data.get("email") ?? ""),
+            phone: String(data.get("phone") ?? ""),
+            role: String(data.get("role") ?? ""),
+            expectedRate: String(data.get("rate") ?? ""),
+            company: String(data.get("company") ?? ""),
+          };
+
+          fetch(`${apiBase}/api/leads`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            keepalive: true,
+          }).catch(() => {
+            // Swallowed — Calendly is the real success path, not this POST.
+          });
+        } catch {
+          // Swallowed — never block or surface errors for the Calendly form.
+        }
+      });
     }
   }
 </script>

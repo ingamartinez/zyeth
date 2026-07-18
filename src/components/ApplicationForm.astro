@@ -1,0 +1,454 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Talent application form → POST /api/applications (multipart/form-data,
+// CV upload). This IS the primary submission path (no Calendly fallback),
+// so the client script owns the full submit lifecycle: prevent the native
+// submit, POST via fetch, and reflect status inline (submitting / success /
+// specific error) through an aria-live region. See issue #29.
+//
+// Field names are wired 1:1 to backend/src/lib/validation.ts's
+// applicationFieldsSchema (name, email, roleExperience, englishLevel,
+// company honeypot) plus the separate `cv` file field validated in
+// backend/src/lib/uploads.ts (PDF/DOC/DOCX, 5MB cap by default).
+const englishLevels = [
+  { value: "basic", labelKey: "careers.form.englishLevel.basic" as const },
+  { value: "intermediate", labelKey: "careers.form.englishLevel.intermediate" as const },
+  { value: "advanced", labelKey: "careers.form.englishLevel.advanced" as const },
+  { value: "native", labelKey: "careers.form.englishLevel.native" as const },
+];
+---
+
+<section id="apply" class="application" aria-labelledby="application-heading">
+  <div class="application-wrap mx-auto max-w-7xl px-4 sm:px-6">
+    <div class="application-panel reveal" style="--i:0">
+      <div class="application-head">
+        <h2 id="application-heading" class="application-title">{t("careers.form.heading")}</h2>
+        <p class="application-intro">{t("careers.form.intro")}</p>
+        <p class="application-required">{t("careers.form.requiredHint")}</p>
+      </div>
+
+      <form
+        class="application-form"
+        novalidate
+        enctype="multipart/form-data"
+        data-submitting-label={t("careers.form.submitting")}
+        data-success-message={t("careers.form.success")}
+        data-err-validation={t("careers.form.error.validation")}
+        data-err-file-type={t("careers.form.error.fileType")}
+        data-err-file-size={t("careers.form.error.fileSize")}
+        data-err-rate-limit={t("careers.form.error.rateLimit")}
+        data-err-generic={t("careers.form.error.generic")}
+      >
+        <div class="field">
+          <label for="application-name">{t("careers.form.nameLabel")} *</label>
+          <input
+            id="application-name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder={t("careers.form.namePlaceholder")}
+            required
+            aria-required="true"
+          />
+        </div>
+
+        <div class="field">
+          <label for="application-email">{t("careers.form.emailLabel")} *</label>
+          <input
+            id="application-email"
+            name="email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            placeholder={t("careers.form.emailPlaceholder")}
+            required
+            aria-required="true"
+          />
+        </div>
+
+        <div class="field field-full">
+          <label for="application-role-experience">{t("careers.form.roleExperienceLabel")} *</label>
+          <textarea
+            id="application-role-experience"
+            name="roleExperience"
+            rows="4"
+            placeholder={t("careers.form.roleExperiencePlaceholder")}
+            required
+            aria-required="true"
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="application-english-level">{t("careers.form.englishLevelLabel")} *</label>
+          <select id="application-english-level" name="englishLevel" required aria-required="true">
+            <option value="" selected disabled>{t("careers.form.englishLevel.placeholder")}</option>
+            {
+              englishLevels.map(({ value, labelKey }) => (
+                <option value={value}>{t(labelKey)}</option>
+              ))
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="application-cv">{t("careers.form.cvLabel")} *</label>
+          <input
+            id="application-cv"
+            name="cv"
+            type="file"
+            accept=".pdf,.doc,.docx"
+            required
+            aria-required="true"
+            aria-describedby="application-cv-helper"
+          />
+          <p id="application-cv-helper" class="application-helper">{t("careers.form.cvHelper")}</p>
+        </div>
+
+        <!-- Honeypot: real users never see or fill this. See backend/src/lib/validation.ts. -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="application-company">{t("honeypot.label")}</label>
+          <input
+            id="application-company"
+            name="company"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field-submit">
+          <button type="submit" class="application-btn">
+            <span class="btn-label">{t("careers.form.submit")}</span>
+          </button>
+          <p class="application-status" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .application {
+    background: var(--color-surface);
+  }
+  .application-wrap {
+    padding-top: 64px;
+    padding-bottom: 84px;
+  }
+
+  /* ---------- panel ---------- */
+  .application-panel {
+    background: var(--color-brand-green-dark);
+    color: var(--color-near-white);
+    border-radius: 26px;
+    padding: 48px 44px;
+    box-shadow: 0 40px 80px -34px rgba(0, 0, 0, 0.55);
+  }
+
+  .application-head {
+    max-width: 640px;
+    margin: 0 auto 36px;
+  }
+  .application-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 3.2vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin: 0 0 12px;
+  }
+  .application-intro {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-near-white);
+    opacity: 0.82;
+    margin: 0 0 10px;
+  }
+  .application-required {
+    font-size: 0.8rem;
+    color: var(--color-near-white);
+    opacity: 0.6;
+    margin: 0;
+  }
+
+  /* ---------- form ---------- */
+  .application-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .field {
+    display: grid;
+    gap: 8px;
+  }
+  .field-full {
+    grid-column: 1 / -1;
+  }
+  .field label {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--color-near-white);
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 11px;
+    padding: 12px 14px;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  .field select {
+    appearance: auto;
+  }
+  .field select option {
+    color: #06231f;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: rgba(238, 245, 241, 0.42);
+  }
+  .field input:hover,
+  .field select:hover,
+  .field textarea:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .field input:focus-visible,
+  .field select:focus-visible,
+  .field textarea:focus-visible {
+    outline: 2px solid var(--color-brand-teal);
+    outline-offset: 2px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .application-helper {
+    font-size: 0.78rem;
+    color: var(--color-near-white);
+    opacity: 0.6;
+    margin: 0;
+  }
+
+  /* ---------- honeypot: visually hidden, never display:none/hidden ---------- */
+  .hp-field {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .field-submit {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-top: 6px;
+  }
+  .application-btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.97rem;
+    border: 0;
+    cursor: pointer;
+    border-radius: 11px;
+    padding: 14px 28px;
+    color: #06231f;
+    background: linear-gradient(135deg, var(--color-brand-teal), var(--color-brand-lime));
+    box-shadow: 0 10px 26px -12px rgba(43, 175, 163, 0.8);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  }
+  .application-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -12px rgba(43, 175, 163, 0.9);
+  }
+  .application-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+    transform: none;
+  }
+  .application-status {
+    font-size: 0.85rem;
+    margin: 0;
+    color: var(--color-near-white);
+  }
+  .application-status[data-state="error"] {
+    color: #f4a7a1;
+  }
+  .application-status[data-state="success"] {
+    color: var(--color-brand-lime);
+  }
+
+  /* ---------- motion ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 720px) {
+    .application-panel {
+      padding: 40px 28px;
+    }
+    .application-form {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .application-wrap {
+      padding-top: 44px;
+      padding-bottom: 56px;
+    }
+    .application-panel {
+      padding: 32px 20px;
+      border-radius: 20px;
+    }
+    .application-head {
+      margin-bottom: 28px;
+    }
+  }
+</style>
+
+<script>
+  const section = document.querySelector<HTMLElement>(".application");
+  if (section) {
+    // ---------- scroll reveal (same pattern as Contact.astro) ----------
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = section.querySelectorAll<HTMLElement>(".reveal");
+    if (reduce || !("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("in"));
+    } else {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("in");
+              obs.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.15 },
+      );
+      items.forEach((el) => io.observe(el));
+    }
+
+    // ---------- submit lifecycle ----------
+    const form = section.querySelector<HTMLFormElement>(".application-form");
+    const button = section.querySelector<HTMLButtonElement>(".application-btn");
+    const buttonLabel = section.querySelector<HTMLElement>(".btn-label");
+    const status = section.querySelector<HTMLElement>(".application-status");
+
+    // Localized copy is baked in as data attributes so this script stays
+    // framework-free while still reading translated strings from the DOM
+    // (no client-side i18n runtime needed for a handful of status strings).
+    const copy = {
+      submit: buttonLabel?.textContent ?? "Submit",
+      submitting: form?.dataset.submittingLabel ?? "Submitting…",
+      success: form?.dataset.successMessage ?? "Submitted.",
+      errValidation: form?.dataset.errValidation ?? "Please check your answers and try again.",
+      errFileType: form?.dataset.errFileType ?? "Unsupported file type.",
+      errFileSize: form?.dataset.errFileSize ?? "File is too large.",
+      errRateLimit: form?.dataset.errRateLimit ?? "Too many attempts — try again later.",
+      errGeneric: form?.dataset.errGeneric ?? "Something went wrong. Please try again later.",
+    };
+
+    const setStatus = (state: "idle" | "success" | "error", message: string) => {
+      if (!status) return;
+      status.textContent = message;
+      if (state === "idle") {
+        status.removeAttribute("data-state");
+      } else {
+        status.setAttribute("data-state", state);
+      }
+    };
+
+    if (form && button && buttonLabel) {
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        // `novalidate` suppresses the browser's automatic validation-on-submit,
+        // but reportValidity() still runs the native constraint checks, shows
+        // the native bubble UI, AND moves focus to the first invalid field —
+        // exactly the keyboard/screen-reader behavior the AA DoD requires.
+        if (!form.reportValidity()) {
+          return;
+        }
+
+        const apiBase = import.meta.env.PUBLIC_API_BASE_URL;
+        setStatus("idle", "");
+        button.disabled = true;
+        buttonLabel.textContent = copy.submitting;
+
+        // Backend isn't deployed yet (#33/#34 open) — no live URL to POST
+        // to. Skip the fetch entirely rather than attempting a request to
+        // a nonexistent origin (which would surface console errors), and
+        // tell the user plainly instead of pretending it worked.
+        if (!apiBase) {
+          setStatus("error", copy.errGeneric);
+          button.disabled = false;
+          buttonLabel.textContent = copy.submit;
+          return;
+        }
+
+        try {
+          const formData = new FormData(form);
+          const response = await fetch(`${apiBase}/api/applications`, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            setStatus("success", copy.success);
+            form.reset();
+          } else if (response.status === 400) {
+            const body = await response.json().catch(() => null);
+            const cvError = body?.errors?.find((e: { field: string }) => e.field === "cv");
+            setStatus("error", cvError ? copy.errFileType : copy.errValidation);
+          } else if (response.status === 413) {
+            setStatus("error", copy.errFileSize);
+          } else if (response.status === 429) {
+            setStatus("error", copy.errRateLimit);
+          } else {
+            setStatus("error", copy.errGeneric);
+          }
+        } catch {
+          setStatus("error", copy.errGeneric);
+        } finally {
+          button.disabled = false;
+          buttonLabel.textContent = copy.submit;
+        }
+      });
+    }
+  }
+</script>
