@@ -214,6 +214,50 @@ export const ui = {
     "howitworks.cta.heading": "Ready to see your shortlist?",
     "howitworks.cta.body":
       "Tell us the role and we'll have curated candidates in front of you this week.",
+
+    // Careers — page meta
+    "careers.meta.title": "Careers",
+    "careers.meta.description":
+      "Apply to join Zyeth's curated network of Colombian operations talent working US hours.",
+
+    // Careers — page hero
+    "careers.hero.eyebrow": "Join our talent network",
+    "careers.hero.h1": "Work with US teams, from Medellín",
+    "careers.hero.subtitle":
+      "We're always curating operators for US operations teams — logistics, payables, and customer support. Apply once and we'll reach out when there's a fit.",
+
+    // Careers — application form
+    "careers.form.heading": "Tell us about you",
+    "careers.form.intro":
+      "Share your background and a copy of your CV — our recruiters review every application.",
+    "careers.form.requiredHint": "* Required",
+    "careers.form.nameLabel": "Full name",
+    "careers.form.namePlaceholder": "Valentina Ramírez",
+    "careers.form.emailLabel": "Email",
+    "careers.form.emailPlaceholder": "you@example.com",
+    "careers.form.roleExperienceLabel": "Role & experience",
+    "careers.form.roleExperiencePlaceholder":
+      "e.g. Logistics coordinator with 3 years booking freight and tracking exceptions",
+    "careers.form.englishLevelLabel": "English level",
+    "careers.form.englishLevel.placeholder": "Select your level",
+    "careers.form.englishLevel.basic": "Basic",
+    "careers.form.englishLevel.intermediate": "Intermediate",
+    "careers.form.englishLevel.advanced": "Advanced",
+    "careers.form.englishLevel.native": "Native",
+    "careers.form.cvLabel": "CV / résumé",
+    "careers.form.cvHelper": "PDF, DOC, or DOCX — max 5 MB.",
+    "careers.form.submit": "Submit application",
+    "careers.form.submitting": "Submitting…",
+    "careers.form.success": "Thanks — your application is in. We'll be in touch if there's a fit.",
+    "careers.form.error.validation": "Please check your answers and try again.",
+    "careers.form.error.fileType": "Your CV must be a PDF, DOC, or DOCX file.",
+    "careers.form.error.fileSize": "Your CV is too large — the maximum size is 5 MB.",
+    "careers.form.error.rateLimit": "Too many attempts — please try again in a few minutes.",
+    "careers.form.error.generic":
+      "Something went wrong and we couldn't submit your application. Please try again later.",
+
+    // Shared — honeypot field (hidden from real users, never localized visually)
+    "honeypot.label": "Leave this field blank",
   },
   es: {
     "site.name": "Zyeth",
@@ -417,6 +461,50 @@ export const ui = {
     "howitworks.cta.heading": "¿Listo para ver tu preselección?",
     "howitworks.cta.body":
       "Contanos el rol y tenés candidatos curados frente a vos esta misma semana.",
+
+    // Postulate — meta de la página
+    "careers.meta.title": "Postulate",
+    "careers.meta.description":
+      "Postulate a la red curada de talento operativo colombiano de Zyeth, trabajando en horario de EE. UU.",
+
+    // Postulate — hero de página
+    "careers.hero.eyebrow": "Sumate a nuestra red de talento",
+    "careers.hero.h1": "Trabajá con equipos de EE. UU., desde Medellín",
+    "careers.hero.subtitle":
+      "Siempre estamos curando operadores para equipos de operaciones de EE. UU. — logística, cuentas por pagar y atención al cliente. Postulate una vez y te contactamos cuando haya un encaje.",
+
+    // Postulate — formulario de postulación
+    "careers.form.heading": "Contanos sobre vos",
+    "careers.form.intro":
+      "Compartí tu experiencia y una copia de tu CV — nuestro equipo de reclutamiento revisa cada postulación.",
+    "careers.form.requiredHint": "* Obligatorio",
+    "careers.form.nameLabel": "Nombre completo",
+    "careers.form.namePlaceholder": "Valentina Ramírez",
+    "careers.form.emailLabel": "Email",
+    "careers.form.emailPlaceholder": "vos@ejemplo.com",
+    "careers.form.roleExperienceLabel": "Rol y experiencia",
+    "careers.form.roleExperiencePlaceholder":
+      "ej: Coordinadora de logística con 3 años reservando fletes y siguiendo excepciones",
+    "careers.form.englishLevelLabel": "Nivel de inglés",
+    "careers.form.englishLevel.placeholder": "Elegí tu nivel",
+    "careers.form.englishLevel.basic": "Básico",
+    "careers.form.englishLevel.intermediate": "Intermedio",
+    "careers.form.englishLevel.advanced": "Avanzado",
+    "careers.form.englishLevel.native": "Nativo",
+    "careers.form.cvLabel": "CV / currículum",
+    "careers.form.cvHelper": "PDF, DOC o DOCX — máximo 5 MB.",
+    "careers.form.submit": "Enviar postulación",
+    "careers.form.submitting": "Enviando…",
+    "careers.form.success": "Listo — recibimos tu postulación. Te contactamos si hay un encaje.",
+    "careers.form.error.validation": "Revisá tus respuestas e intentá de nuevo.",
+    "careers.form.error.fileType": "Tu CV debe ser un archivo PDF, DOC o DOCX.",
+    "careers.form.error.fileSize": "Tu CV es demasiado grande — el tamaño máximo es 5 MB.",
+    "careers.form.error.rateLimit": "Demasiados intentos — probá de nuevo en unos minutos.",
+    "careers.form.error.generic":
+      "Algo salió mal y no pudimos enviar tu postulación. Probá de nuevo más tarde.",
+
+    // Compartido — campo honeypot (oculto para usuarios reales, sin localización visual)
+    "honeypot.label": "Dejá este campo vacío",
   },
 } as const;
 

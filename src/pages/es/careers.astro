@@ -1,0 +1,27 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Nav from "../../components/Nav.astro";
+import PageHero from "../../components/PageHero.astro";
+import ApplicationForm from "../../components/ApplicationForm.astro";
+import Footer from "../../components/Footer.astro";
+import { useTranslations, getLangFromUrl } from "../../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<Layout
+  title={`${t("site.name")} — ${t("careers.meta.title")}`}
+  description={t("careers.meta.description")}
+>
+  <Nav />
+  <main>
+    <PageHero
+      eyebrowKey="careers.hero.eyebrow"
+      headingKey="careers.hero.h1"
+      subtitleKey="careers.hero.subtitle"
+    />
+    <ApplicationForm />
+  </main>
+  <Footer />
+</Layout>
