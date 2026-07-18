@@ -106,6 +106,27 @@ export const ui = {
     "services.role6.title": "Data & reporting analysts",
     "services.role6.body":
       "Turn spreadsheets and systems into the dashboards and numbers your leadership actually reads.",
+
+    // Home — US vs Medellín cost comparison
+    "compare.eyebrow": "The math",
+    "compare.heading": "What the same role costs you, side by side",
+    "compare.intro":
+      "Pick a role and see the fully-loaded monthly cost of a US hire against the same person through Zyeth — in Medellín, on your timezone.",
+    "compare.selectLabel": "Choose a role",
+    "compare.role1": "Logistics coordinator",
+    "compare.role2": "AP specialist",
+    "compare.role3": "Operations manager",
+    "compare.role4": "Customer support",
+    "compare.role5": "Procurement",
+    "compare.role6": "Data analyst",
+    "compare.usLabel": "Equivalent US hire",
+    "compare.zyethLabel": "With Zyeth",
+    "compare.perMonth": "Fully-loaded cost per month",
+    "compare.saveLabel": "You save",
+    "compare.annual": "≈ {v} a year",
+    "compare.exampleTag": "Example",
+    "compare.note":
+      "Illustrative rates to show the gap — you get exact numbers for your roles on a quick call.",
   },
   es: {
     "site.name": "Zyeth",
@@ -201,6 +222,27 @@ export const ui = {
     "services.role6.title": "Analistas de datos y reportes",
     "services.role6.body":
       "Convierten planillas y sistemas en los dashboards y números que tu liderazgo realmente lee.",
+
+    // Home — comparación de costos EE. UU. vs. Medellín
+    "compare.eyebrow": "Los números",
+    "compare.heading": "Cuánto te cuesta el mismo rol, lado a lado",
+    "compare.intro":
+      "Elegí un rol y compará el costo mensual total de una contratación en EE. UU. contra la misma persona a través de Zyeth — en Medellín, en tu horario.",
+    "compare.selectLabel": "Elegí un rol",
+    "compare.role1": "Coord. de logística",
+    "compare.role2": "Cuentas por pagar",
+    "compare.role3": "Gerente de ops",
+    "compare.role4": "Soporte al cliente",
+    "compare.role5": "Compras",
+    "compare.role6": "Analista de datos",
+    "compare.usLabel": "Contratación en EE. UU.",
+    "compare.zyethLabel": "Con Zyeth",
+    "compare.perMonth": "Costo mensual total",
+    "compare.saveLabel": "Ahorrás",
+    "compare.annual": "≈ {v} al año",
+    "compare.exampleTag": "Ejemplo",
+    "compare.note":
+      "Tarifas ilustrativas para mostrar la diferencia — los números exactos para tus roles te los damos en una llamada corta.",
   },
 } as const;
 
