@@ -127,6 +127,24 @@ export const ui = {
     "compare.exampleTag": "Example",
     "compare.note":
       "Illustrative rates to show the gap — you get exact numbers for your roles on a quick call.",
+
+    // Home — why choose us
+    "whychoose.aria": "Why US teams choose Zyeth",
+    "whychoose.eyebrow": "Why Zyeth",
+    "whychoose.heading": "Why teams pick us over a job board",
+    "whychoose.intro":
+      "Anyone can send you résumés. We do the vetting, carry the risk, and put someone on your team who's already working your hours.",
+    "whychoose.point1.title": "Curated, not crowdsourced",
+    "whychoose.point1.body":
+      "Every candidate is hand-picked and vetted — English, experience, and references checked — before they reach your inbox. You interview a shortlist, not a stack.",
+    "whychoose.point2.title": "On your clock, every day",
+    "whychoose.point2.body":
+      "Our operators work from Medellín, ≤ 1 hour behind New York. Same-day answers and live handoffs — no overnight lag between you and your team.",
+    "whychoose.point3.title": "Low-risk for the first 3 months",
+    "whychoose.point3.body":
+      "We carry payroll and compliance while the fit proves itself. When it works, convert them to your team. If it doesn't, walk away clean.",
+    "whychoose.imageAlt":
+      "A Zyeth operations specialist wearing a headset, smiling at her desk in a modern office.",
   },
   es: {
     "site.name": "Zyeth",
@@ -243,6 +261,24 @@ export const ui = {
     "compare.exampleTag": "Ejemplo",
     "compare.note":
       "Tarifas ilustrativas para mostrar la diferencia — los números exactos para tus roles te los damos en una llamada corta.",
+
+    // Home — por qué elegirnos
+    "whychoose.aria": "Por qué los equipos de EE. UU. eligen Zyeth",
+    "whychoose.eyebrow": "Por qué Zyeth",
+    "whychoose.heading": "Por qué nos eligen antes que a un portal de empleo",
+    "whychoose.intro":
+      "Cualquiera te manda currículums. Nosotros hacemos la verificación, asumimos el riesgo y sumamos a tu equipo a alguien que ya trabaja en tu horario.",
+    "whychoose.point1.title": "Curado, no masivo",
+    "whychoose.point1.body":
+      "Cada candidato es elegido a mano y verificado — inglés, experiencia y referencias chequeadas — antes de que llegue a tu bandeja. Entrevistás una preselección, no una pila.",
+    "whychoose.point2.title": "En tu horario, todos los días",
+    "whychoose.point2.body":
+      "Nuestros operadores trabajan desde Medellín, a ≤ 1 hora de Nueva York. Respuestas el mismo día y entregas en vivo — sin demoras de un día para otro entre vos y tu equipo.",
+    "whychoose.point3.title": "Bajo riesgo los primeros 3 meses",
+    "whychoose.point3.body":
+      "Nos hacemos cargo de la nómina y el cumplimiento mientras el encaje se demuestra. Cuando funciona, pasalos a tu equipo. Si no, te vas sin ataduras.",
+    "whychoose.imageAlt":
+      "Una especialista de operaciones de Zyeth con auriculares, sonriendo en su escritorio en una oficina moderna.",
   },
 } as const;
 
