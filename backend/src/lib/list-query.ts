@@ -5,13 +5,21 @@
 
 export const PAGE_SIZE = 25;
 
+// Upper bound for `?page=` — without this, `?page=999999999` would still
+// pass the "positive number" check below and produce a huge (but valid)
+// OFFSET on every list query.
+const MAX_PAGE = 100_000;
+
 // Parses `?page=` defensively: missing, non-numeric, zero, or negative
-// values all fall back to page 1 rather than producing a negative
-// OFFSET or a NaN that would reach Drizzle.
+// values all fall back to page 1; anything above MAX_PAGE is clamped
+// down to it, rather than producing a negative/NaN/unbounded OFFSET.
 export function parsePage(searchParams: URLSearchParams): number {
   const raw = searchParams.get('page');
   const parsed = raw ? Number.parseInt(raw, 10) : 1;
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return 1;
+  }
+  return Math.min(parsed, MAX_PAGE);
 }
 
 // Trims a text filter param to `undefined` when absent/blank, so callers

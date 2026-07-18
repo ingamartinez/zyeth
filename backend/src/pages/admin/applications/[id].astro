@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import AdminNav from '../../../components/AdminNav.astro';
 import { db, talentApplications } from '../../../db';
 import { ensureCsrfToken } from '../../../lib/csrf';
+import { isUuid } from '../../../lib/ids';
 import '../../../styles/admin.css';
 
 // Guarded by src/middleware.ts — see admin/index.astro for why this
@@ -13,10 +14,15 @@ if (!user) {
   return Astro.redirect('/admin/login');
 }
 
+// `talent_applications.id` is a Postgres `uuid` column — validate the
+// shape BEFORE querying so a malformed id falls through to the same
+// "not found" redirect below instead of Postgres throwing `invalid
+// input syntax for type uuid` as an unhandled 500.
 const { id } = Astro.params;
-const rows = id
-  ? await db.select().from(talentApplications).where(eq(talentApplications.id, id)).limit(1)
-  : [];
+const rows =
+  id && isUuid(id)
+    ? await db.select().from(talentApplications).where(eq(talentApplications.id, id)).limit(1)
+    : [];
 const application = rows[0];
 
 if (!application) {

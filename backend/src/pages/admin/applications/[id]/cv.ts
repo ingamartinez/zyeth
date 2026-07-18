@@ -5,6 +5,7 @@ import type { APIRoute } from 'astro';
 import { eq } from 'drizzle-orm';
 
 import { db, talentApplications } from '../../../../db';
+import { isUuid } from '../../../../lib/ids';
 import { getUploadsDir } from '../../../../lib/uploads';
 
 // Authenticated CV download for a single talent application (#31). Lives
@@ -43,7 +44,12 @@ function toAsciiFallback(name: string): string {
 
 export const GET: APIRoute = async ({ params }) => {
   const id = params.id;
-  if (!id) {
+  // `talent_applications.id` is a Postgres `uuid` column — validate the
+  // shape BEFORE querying so a malformed id (e.g. `/admin/applications/1/cv`)
+  // returns the same 404 as a well-formed-but-missing id, instead of
+  // Postgres throwing `invalid input syntax for type uuid` as an
+  // unhandled 500.
+  if (!id || !isUuid(id)) {
     return new Response('Not found', { status: 404 });
   }
 
