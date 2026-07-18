@@ -21,11 +21,14 @@ export default defineConfig({
     // defenses here, so Astro's stricter same-origin default would just
     // block legitimate traffic.
     //
-    // NOTE for whoever adds authenticated (cookie/session) admin routes
-    // in a later issue: re-evaluate this. Either scope the CSRF
-    // exemption to just these two public paths (e.g. via middleware) or
-    // re-enable checkOrigin and give authenticated routes their own CSRF
-    // story.
+    // #30 added authenticated (cookie/session) admin routes under
+    // /admin/*. Rather than re-enable this globally (which would break
+    // the public endpoints above), admin mutations get their OWN
+    // app-level CSRF story: a double-submit token (src/lib/csrf.ts)
+    // checked explicitly by the login and logout POST handlers, plus the
+    // session cookie's own `sameSite: 'lax'` flag (src/lib/session.ts).
+    // This stays `false` globally on purpose — do not flip it without
+    // re-auditing the public submission endpoints.
     checkOrigin: false,
   },
 });
