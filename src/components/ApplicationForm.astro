@@ -235,11 +235,6 @@ const englishLevels = [
     outline-offset: 2px;
     background: rgba(255, 255, 255, 0.1);
   }
-  .field input[aria-invalid="true"],
-  .field select[aria-invalid="true"],
-  .field textarea[aria-invalid="true"] {
-    border-color: #e0716a;
-  }
   .application-helper {
     font-size: 0.78rem;
     color: var(--color-near-white);
@@ -381,7 +376,7 @@ const englishLevels = [
       submit: buttonLabel?.textContent ?? "Submit",
       submitting: form?.dataset.submittingLabel ?? "Submitting…",
       success: form?.dataset.successMessage ?? "Submitted.",
-      errValidation: form?.dataset.errValidation ?? "Please check the highlighted fields and try again.",
+      errValidation: form?.dataset.errValidation ?? "Please check your answers and try again.",
       errFileType: form?.dataset.errFileType ?? "Unsupported file type.",
       errFileSize: form?.dataset.errFileSize ?? "File is too large.",
       errRateLimit: form?.dataset.errRateLimit ?? "Too many attempts — try again later.",
@@ -401,6 +396,14 @@ const englishLevels = [
     if (form && button && buttonLabel) {
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
+
+        // `novalidate` suppresses the browser's automatic validation-on-submit,
+        // but reportValidity() still runs the native constraint checks, shows
+        // the native bubble UI, AND moves focus to the first invalid field —
+        // exactly the keyboard/screen-reader behavior the AA DoD requires.
+        if (!form.reportValidity()) {
+          return;
+        }
 
         const apiBase = import.meta.env.PUBLIC_API_BASE_URL;
         setStatus("idle", "");
