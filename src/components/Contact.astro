@@ -1,0 +1,297 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Client lead form → Calendly. Static site, no backend capture (see issue #8):
+// the form submits as a GET request straight to the Calendly booking page.
+// `name` and `email` map to Calendly's own prefill query params, so the
+// invitee doesn't have to retype them once they land there. Role/rate/phone
+// aren't Calendly-native fields — they still travel as harmless extra query
+// params, but their real job is to get the requester thinking about specifics
+// before the call, matching the Figma "Needs Experience" form-box intent.
+const calendlyUrl = "https://calendly.com/ing-amartinez94/30min";
+---
+
+<section id="contact" class="contact" aria-labelledby="contact-heading">
+  <div class="contact-wrap mx-auto max-w-7xl px-4 sm:px-6">
+    <div class="contact-panel reveal" style="--i:0">
+      <div class="contact-head">
+        <span class="contact-eyebrow">{t("contact.eyebrow")}</span>
+        <h2 id="contact-heading" class="contact-title">{t("contact.heading")}</h2>
+        <p class="contact-intro">{t("contact.intro")}</p>
+      </div>
+
+      <form class="contact-form" action={calendlyUrl} method="get" target="_blank" rel="noopener noreferrer">
+        <div class="field">
+          <label for="contact-role">{t("contact.roleLabel")}</label>
+          <input
+            id="contact-role"
+            name="role"
+            type="text"
+            placeholder={t("contact.rolePlaceholder")}
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="contact-rate">
+            {t("contact.rateLabel")} <span class="optional">({t("contact.optional")})</span>
+          </label>
+          <input
+            id="contact-rate"
+            name="rate"
+            type="text"
+            placeholder={t("contact.ratePlaceholder")}
+          />
+        </div>
+
+        <div class="field">
+          <label for="contact-name">{t("contact.nameLabel")}</label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder={t("contact.namePlaceholder")}
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="contact-email">{t("contact.emailLabel")}</label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            placeholder={t("contact.emailPlaceholder")}
+            required
+          />
+        </div>
+
+        <div class="field field-phone">
+          <label for="contact-phone">
+            {t("contact.phoneLabel")} <span class="optional">({t("contact.optional")})</span>
+          </label>
+          <input
+            id="contact-phone"
+            name="phone"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            placeholder={t("contact.phonePlaceholder")}
+          />
+        </div>
+
+        <div class="field-submit">
+          <button type="submit" class="contact-btn">{t("contact.submit")}</button>
+          <p class="contact-note">{t("contact.note")}</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    background: var(--color-surface);
+  }
+  .contact-wrap {
+    padding-top: 76px;
+    padding-bottom: 84px;
+  }
+
+  /* ---------- panel ---------- */
+  .contact-panel {
+    background: var(--color-brand-green-dark);
+    color: var(--color-near-white);
+    border-radius: 26px;
+    padding: 48px 44px;
+    box-shadow: 0 40px 80px -34px rgba(0, 0, 0, 0.55);
+  }
+
+  .contact-head {
+    max-width: 640px;
+    margin: 0 auto 36px;
+    text-align: center;
+  }
+  .contact-eyebrow {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brand-teal);
+    margin-bottom: 12px;
+  }
+  .contact-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin: 0 0 14px;
+  }
+  .contact-intro {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-near-white);
+    opacity: 0.82;
+    margin: 0 auto;
+  }
+
+  /* ---------- form ---------- */
+  .contact-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .field {
+    display: grid;
+    gap: 8px;
+  }
+  .field-phone {
+    grid-column: 1 / -1;
+    max-width: calc(50% - 12px);
+  }
+  .field label {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--color-near-white);
+  }
+  .optional {
+    font-weight: 400;
+    color: var(--color-near-white);
+    opacity: 0.62;
+  }
+  .field input {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 11px;
+    padding: 12px 14px;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+  .field input::placeholder {
+    color: rgba(238, 245, 241, 0.42);
+  }
+  .field input:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .field input:focus-visible {
+    outline: 2px solid var(--color-brand-teal);
+    outline-offset: 2px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .field-submit {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-top: 6px;
+  }
+  .contact-btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.97rem;
+    border: 0;
+    cursor: pointer;
+    border-radius: 11px;
+    padding: 14px 28px;
+    color: #06231f;
+    background: linear-gradient(135deg, var(--color-brand-teal), var(--color-brand-lime));
+    box-shadow: 0 10px 26px -12px rgba(43, 175, 163, 0.8);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .contact-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -12px rgba(43, 175, 163, 0.9);
+  }
+  .contact-note {
+    font-size: 0.8rem;
+    color: var(--color-near-white);
+    opacity: 0.62;
+    margin: 0;
+  }
+
+  /* ---------- motion ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 720px) {
+    .contact-panel {
+      padding: 40px 28px;
+    }
+    .contact-form {
+      grid-template-columns: 1fr;
+    }
+    .field-phone {
+      max-width: none;
+    }
+  }
+  @media (max-width: 560px) {
+    .contact-wrap {
+      padding-top: 52px;
+      padding-bottom: 56px;
+    }
+    .contact-panel {
+      padding: 32px 20px;
+      border-radius: 20px;
+    }
+    .contact-head {
+      margin-bottom: 28px;
+    }
+  }
+</style>
+
+<script>
+  const section = document.querySelector<HTMLElement>(".contact");
+  if (section) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = section.querySelectorAll<HTMLElement>(".reveal");
+    if (reduce || !("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("in"));
+    } else {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("in");
+              obs.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.15 },
+      );
+      items.forEach((el) => io.observe(el));
+    }
+  }
+</script>

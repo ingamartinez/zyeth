@@ -145,6 +145,25 @@ export const ui = {
       "We carry payroll and compliance while the fit proves itself. When it works, convert them to your team. If it doesn't, walk away clean.",
     "whychoose.imageAlt":
       "A Zyeth operations specialist wearing a headset, smiling at her desk in a modern office.",
+
+    // Home — contact / lead form (client)
+    "contact.eyebrow": "Ready to hire?",
+    "contact.heading": "Tell us who you need — we'll bring the shortlist",
+    "contact.intro":
+      "Share the role and the rate you have in mind. We'll match you with vetted candidates and book a quick call to walk through the shortlist.",
+    "contact.roleLabel": "Role you're hiring for",
+    "contact.rolePlaceholder": "e.g. Logistics coordinator",
+    "contact.rateLabel": "Typical expected rate",
+    "contact.ratePlaceholder": "e.g. $3,000–$4,000/mo",
+    "contact.nameLabel": "Your name",
+    "contact.namePlaceholder": "Jane Smith",
+    "contact.emailLabel": "Work email",
+    "contact.emailPlaceholder": "jane@company.com",
+    "contact.phoneLabel": "Phone number",
+    "contact.phonePlaceholder": "+1 (555) 123-4567",
+    "contact.optional": "Optional",
+    "contact.submit": "Book a call",
+    "contact.note": "You'll finish scheduling on Calendly — takes about a minute.",
   },
   es: {
     "site.name": "Zyeth",
@@ -279,6 +298,25 @@ export const ui = {
       "Nos hacemos cargo de la nómina y el cumplimiento mientras el encaje se demuestra. Cuando funciona, pasalos a tu equipo. Si no, te vas sin ataduras.",
     "whychoose.imageAlt":
       "Una especialista de operaciones de Zyeth con auriculares, sonriendo en su escritorio en una oficina moderna.",
+
+    // Home — contacto / formulario de leads (cliente)
+    "contact.eyebrow": "¿Listo para contratar?",
+    "contact.heading": "Contanos a quién necesitás — te traemos la preselección",
+    "contact.intro":
+      "Compartí el rol y la tarifa que tenés en mente. Te conectamos con candidatos verificados y agendamos una llamada corta para repasar la preselección.",
+    "contact.roleLabel": "Rol que estás buscando",
+    "contact.rolePlaceholder": "ej: Coordinador de logística",
+    "contact.rateLabel": "Tarifa esperada habitual",
+    "contact.ratePlaceholder": "ej: $3.000–$4.000/mes",
+    "contact.nameLabel": "Tu nombre",
+    "contact.namePlaceholder": "Jane Smith",
+    "contact.emailLabel": "Email laboral",
+    "contact.emailPlaceholder": "jane@empresa.com",
+    "contact.phoneLabel": "Teléfono",
+    "contact.phonePlaceholder": "+1 (555) 123-4567",
+    "contact.optional": "Opcional",
+    "contact.submit": "Agendá una llamada",
+    "contact.note": "Terminás de agendar en Calendly — toma un minuto.",
   },
 } as const;
 
