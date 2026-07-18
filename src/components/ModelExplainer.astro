@@ -1,0 +1,188 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const points = [
+  { title: t("howitworks.model.point1.title"), body: t("howitworks.model.point1.body") },
+  { title: t("howitworks.model.point2.title"), body: t("howitworks.model.point2.body") },
+  { title: t("howitworks.model.point3.title"), body: t("howitworks.model.point3.body") },
+] as const;
+---
+
+<section class="model" aria-labelledby="model-heading">
+  <div class="model-wrap mx-auto max-w-7xl px-4 sm:px-6">
+    <div class="model-head reveal">
+      <span class="model-eyebrow">{t("howitworks.model.eyebrow")}</span>
+      <h2 id="model-heading" class="model-heading">{t("howitworks.model.heading")}</h2>
+      <p class="model-intro">{t("howitworks.model.intro")}</p>
+    </div>
+
+    <ul class="model-points">
+      {
+        points.map((point, i) => (
+          <li class="model-point reveal" style={`--i:${i + 1}`}>
+            <span class="point-num" aria-hidden="true">{i + 1}</span>
+            <div class="point-text">
+              <h3 class="point-title">{point.title}</h3>
+              <p class="point-body">{point.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<script>
+  const section = document.querySelector<HTMLElement>(".model");
+  if (section) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = section.querySelectorAll<HTMLElement>(".reveal");
+    if (reduce || !("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("in"));
+    } else {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("in");
+              obs.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.2 },
+      );
+      items.forEach((el) => io.observe(el));
+    }
+  }
+</script>
+
+<style>
+  .model {
+    background: var(--color-brand-green-dark);
+    color: var(--color-near-white);
+  }
+  .model-wrap {
+    padding-top: 76px;
+    padding-bottom: 80px;
+  }
+
+  .model-head {
+    max-width: 640px;
+    margin: 0 auto 44px;
+    text-align: center;
+  }
+  .model-eyebrow {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brand-teal);
+    margin-bottom: 12px;
+  }
+  .model-heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin: 0 0 14px;
+  }
+  .model-intro {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-near-white);
+    opacity: 0.82;
+    margin: 0 auto;
+  }
+
+  .model-points {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .model-point {
+    display: flex;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 22px;
+  }
+  .point-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    flex: none;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-brand-teal);
+    background: rgba(43, 175, 163, 0.14);
+    border: 1px solid rgba(43, 175, 163, 0.3);
+  }
+  .point-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin: 3px 0 6px;
+  }
+  .point-body {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: var(--color-near-white);
+    opacity: 0.78;
+    margin: 0;
+  }
+
+  /* ---------- motion ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: calc(var(--i, 0) * 0.1s);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 860px) {
+    .model-points {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  @media (max-width: 560px) {
+    .model-wrap {
+      padding-top: 52px;
+      padding-bottom: 56px;
+    }
+    .model-head {
+      margin-bottom: 32px;
+    }
+  }
+</style>

@@ -164,6 +164,56 @@ export const ui = {
     "contact.optional": "Optional",
     "contact.submit": "Book a call",
     "contact.note": "You'll finish scheduling on Calendly — takes about a minute.",
+
+    // How it works — page meta
+    "howitworks.meta.title": "How it works",
+    "howitworks.meta.description":
+      "The four-step process to go from an open role to a vetted, curated hire working on your team — in weeks.",
+
+    // How it works — page hero
+    "howitworks.hero.eyebrow": "How it works",
+    "howitworks.hero.h1": "From open role to vetted hire — in four steps",
+    "howitworks.hero.subtitle":
+      "No stacks of résumés, no guesswork on fit. Here's exactly how we get a curated, English-fluent operator working on your team in weeks — not months.",
+
+    // How it works — 4-step stepper
+    "howitworks.steps.aria": "The four-step hiring process",
+    "howitworks.steps.eyebrow": "The process",
+    "howitworks.steps.heading": "Four steps, from brief to hire",
+    "howitworks.steps.intro":
+      "Every search follows the same disciplined process — so you always know what's happening and when.",
+    "howitworks.step1.title": "Tell us the role",
+    "howitworks.step1.body":
+      "A 20-minute call or a short brief — the role, the tools, the rate you have in mind. We use it to define exactly who we're looking for.",
+    "howitworks.step2.title": "We curate and vet a shortlist",
+    "howitworks.step2.body":
+      "Our recruiters source, screen, and verify English, experience, and references — you never see a résumé that hasn't already been checked.",
+    "howitworks.step3.title": "You interview and choose",
+    "howitworks.step3.body":
+      "We hand you a shortlist of 3–5 vetted candidates. You run the interviews, we coordinate scheduling — you pick who joins your team.",
+    "howitworks.step4.title": "They start — through Zyeth, for the first 3 months",
+    "howitworks.step4.body":
+      "Your new hire starts working with your team right away. We carry payroll and compliance while the fit proves itself, then you convert them directly.",
+
+    // How it works — 3-month model explainer
+    "howitworks.model.eyebrow": "The 3-month model",
+    "howitworks.model.heading": "Low-risk from day one",
+    "howitworks.model.intro":
+      "For the first 3 months, your new hire is employed through Zyeth — not you. That means:",
+    "howitworks.model.point1.title": "We carry payroll & compliance",
+    "howitworks.model.point1.body":
+      "Local labor law, benefits, and payments are on us — one predictable invoice for you.",
+    "howitworks.model.point2.title": "You manage the work",
+    "howitworks.model.point2.body":
+      "Day-to-day, tools, and goals stay entirely with your team from day one.",
+    "howitworks.model.point3.title": "Convert whenever you're ready",
+    "howitworks.model.point3.body":
+      "When the fit is proven, we hand off employment directly to you — no lock-in, no extra fee.",
+
+    // How it works — closing CTA
+    "howitworks.cta.heading": "Ready to see your shortlist?",
+    "howitworks.cta.body":
+      "Tell us the role and we'll have curated candidates in front of you this week.",
   },
   es: {
     "site.name": "Zyeth",
@@ -317,6 +367,56 @@ export const ui = {
     "contact.optional": "Opcional",
     "contact.submit": "Agendá una llamada",
     "contact.note": "Terminás de agendar en Calendly — toma un minuto.",
+
+    // Cómo funciona — meta de la página
+    "howitworks.meta.title": "Cómo funciona",
+    "howitworks.meta.description":
+      "El proceso de cuatro pasos para pasar de un rol abierto a una contratación curada y verificada trabajando en tu equipo — en semanas.",
+
+    // Cómo funciona — hero de página
+    "howitworks.hero.eyebrow": "Cómo funciona",
+    "howitworks.hero.h1": "Del rol abierto a la contratación verificada — en cuatro pasos",
+    "howitworks.hero.subtitle":
+      "Nada de pilas de currículums ni apuestas a ciegas. Así es exactamente cómo ponemos a un operador curado y con inglés fluido a trabajar en tu equipo en semanas — no en meses.",
+
+    // Cómo funciona — proceso de 4 pasos
+    "howitworks.steps.aria": "El proceso de contratación de cuatro pasos",
+    "howitworks.steps.eyebrow": "El proceso",
+    "howitworks.steps.heading": "Cuatro pasos, del brief a la contratación",
+    "howitworks.steps.intro":
+      "Cada búsqueda sigue el mismo proceso disciplinado — para que siempre sepas qué está pasando y cuándo.",
+    "howitworks.step1.title": "Contanos el rol",
+    "howitworks.step1.body":
+      "Una llamada de 20 minutos o un brief corto — el rol, las herramientas, la tarifa que tenés en mente. Lo usamos para definir exactamente a quién buscamos.",
+    "howitworks.step2.title": "Curamos y verificamos una preselección",
+    "howitworks.step2.body":
+      "Nuestro equipo de reclutamiento busca, filtra y verifica inglés, experiencia y referencias — nunca ves un currículum que no haya sido chequeado antes.",
+    "howitworks.step3.title": "Entrevistás y elegís",
+    "howitworks.step3.body":
+      "Te entregamos una preselección de 3 a 5 candidatos verificados. Vos hacés las entrevistas, nosotros coordinamos la agenda — elegís quién se suma a tu equipo.",
+    "howitworks.step4.title": "Arranca — a través de Zyeth, los primeros 3 meses",
+    "howitworks.step4.body":
+      "Tu nueva contratación empieza a trabajar con tu equipo de inmediato. Nos hacemos cargo de la nómina y el cumplimiento mientras el encaje se demuestra, y después la pasás directo a tu equipo.",
+
+    // Cómo funciona — modelo de 3 meses
+    "howitworks.model.eyebrow": "El modelo de 3 meses",
+    "howitworks.model.heading": "Bajo riesgo desde el día uno",
+    "howitworks.model.intro":
+      "Durante los primeros 3 meses, tu nueva contratación está empleada a través de Zyeth — no de vos. Eso significa:",
+    "howitworks.model.point1.title": "Nos encargamos de la nómina y el cumplimiento",
+    "howitworks.model.point1.body":
+      "La legislación laboral local, los beneficios y los pagos corren por nuestra cuenta — una sola factura predecible para vos.",
+    "howitworks.model.point2.title": "Vos manejás el trabajo",
+    "howitworks.model.point2.body":
+      "El día a día, las herramientas y los objetivos quedan enteramente con tu equipo desde el primer día.",
+    "howitworks.model.point3.title": "Convertí cuando estés listo",
+    "howitworks.model.point3.body":
+      "Cuando el encaje está probado, te pasamos el empleo directamente — sin ataduras, sin costo extra.",
+
+    // Cómo funciona — CTA de cierre
+    "howitworks.cta.heading": "¿Listo para ver tu preselección?",
+    "howitworks.cta.body":
+      "Contanos el rol y tenés candidatos curados frente a vos esta misma semana.",
   },
 } as const;
 
