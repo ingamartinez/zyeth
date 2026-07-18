@@ -81,6 +81,31 @@ export const ui = {
     "trust.industry2": "E-commerce",
     "trust.industry3": "Manufacturing",
     "trust.industry4": "3PL & fulfillment",
+
+    // Home — services / how we help
+    "services.aria": "Roles we place on US operations teams",
+    "services.eyebrow": "How we help",
+    "services.heading": "The operators who keep your business moving",
+    "services.intro":
+      "We staff the back-office and logistics roles that are hardest to fill on US time — each one hand-picked, English-fluent, and ready to plug into your team.",
+    "services.role1.title": "Logistics coordinators",
+    "services.role1.body":
+      "Track shipments, book carriers, and chase exceptions so freight keeps moving without you watching the board.",
+    "services.role2.title": "Accounts payable specialists",
+    "services.role2.body":
+      "Process invoices, reconcile statements, and keep vendors paid on time — accurate, audit-ready, and on your calendar.",
+    "services.role3.title": "Operations managers",
+    "services.role3.body":
+      "Own daily workflows, keep SLAs green, and coordinate across teams so nothing falls through the cracks.",
+    "services.role4.title": "Order & customer support",
+    "services.role4.body":
+      "Handle orders, returns, and inbound questions with the tone your customers expect — in real time, in your timezone.",
+    "services.role5.title": "Supply chain & procurement",
+    "services.role5.body":
+      "Manage POs, follow up with suppliers, and keep inventory data clean so you never run short or over-order.",
+    "services.role6.title": "Data & reporting analysts",
+    "services.role6.body":
+      "Turn spreadsheets and systems into the dashboards and numbers your leadership actually reads.",
   },
   es: {
     "site.name": "Zyeth",
@@ -151,6 +176,31 @@ export const ui = {
     "trust.industry2": "E-commerce",
     "trust.industry3": "Manufactura",
     "trust.industry4": "3PL y fulfillment",
+
+    // Home — services / how we help
+    "services.aria": "Roles que sumamos a equipos de operaciones de EE. UU.",
+    "services.eyebrow": "Cómo ayudamos",
+    "services.heading": "Los operadores que mantienen tu negocio en movimiento",
+    "services.intro":
+      "Cubrimos los roles de back-office y logística más difíciles de llenar en horario de EE. UU. — cada uno elegido a mano, con inglés fluido y listo para sumarse a tu equipo.",
+    "services.role1.title": "Coordinadores de logística",
+    "services.role1.body":
+      "Siguen envíos, contratan transportistas y resuelven excepciones para que la carga fluya sin que tengas que mirar el tablero.",
+    "services.role2.title": "Especialistas en cuentas por pagar",
+    "services.role2.body":
+      "Procesan facturas, concilian estados de cuenta y mantienen a los proveedores pagos a tiempo — precisos, auditables y en tu calendario.",
+    "services.role3.title": "Gerentes de operaciones",
+    "services.role3.body":
+      "Dueños del flujo diario, mantienen los SLA en verde y coordinan entre equipos para que nada se caiga.",
+    "services.role4.title": "Soporte de pedidos y clientes",
+    "services.role4.body":
+      "Gestionan pedidos, devoluciones y consultas entrantes con el tono que tus clientes esperan — en tiempo real, en tu horario.",
+    "services.role5.title": "Cadena de suministro y compras",
+    "services.role5.body":
+      "Manejan órdenes de compra, hacen seguimiento a proveedores y mantienen los datos de inventario limpios para que nunca falte ni sobre stock.",
+    "services.role6.title": "Analistas de datos y reportes",
+    "services.role6.body":
+      "Convierten planillas y sistemas en los dashboards y números que tu liderazgo realmente lee.",
   },
 } as const;
 
