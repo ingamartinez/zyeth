@@ -1,0 +1,153 @@
+---
+import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
+
+import AdminNav from '../../../components/AdminNav.astro';
+import { db, talentApplications } from '../../../db';
+import { ensureCsrfToken } from '../../../lib/csrf';
+import { PAGE_SIZE, pageUrl, parseFilter, parsePage } from '../../../lib/list-query';
+import '../../../styles/admin.css';
+
+// Guarded by src/middleware.ts — see admin/index.astro for why this
+// check is defensive, not a second auth boundary.
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+const csrfToken = ensureCsrfToken(Astro.cookies);
+
+// `status` and `englishLevel` are exact-match filters (dropdown-style
+// values in practice — englishLevel comes from a fixed select on the
+// public form: basic/intermediate/advanced/native; status only ever
+// carries the schema default 'new' today since there's no admin
+// transition workflow in this issue's scope), while `q` is a substring
+// search over name/email like the leads list.
+const q = parseFilter(Astro.url.searchParams, 'q');
+const status = parseFilter(Astro.url.searchParams, 'status');
+const englishLevel = parseFilter(Astro.url.searchParams, 'englishLevel');
+const page = parsePage(Astro.url.searchParams);
+
+const whereClause = and(
+  q
+    ? or(ilike(talentApplications.name, `%${q}%`), ilike(talentApplications.email, `%${q}%`))
+    : undefined,
+  status ? eq(talentApplications.status, status) : undefined,
+  englishLevel ? eq(talentApplications.englishLevel, englishLevel) : undefined,
+);
+
+const [{ value: total }] = await db
+  .select({ value: sql<number>`count(*)`.mapWith(Number) })
+  .from(talentApplications)
+  .where(whereClause);
+
+const rows = await db
+  .select()
+  .from(talentApplications)
+  .where(whereClause)
+  .orderBy(desc(talentApplications.createdAt))
+  .limit(PAGE_SIZE)
+  .offset((page - 1) * PAGE_SIZE);
+
+const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+const hasPrev = page > 1;
+const hasNext = page < totalPages;
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+function truncate(value: string, max: number): string {
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+}
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Applications — Zyeth Admin</title>
+  </head>
+  <body>
+    <div class="admin-shell">
+      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <h1>Applications</h1>
+
+      <form class="admin-filters" method="GET">
+        <label>
+          Search (name or email)
+          <input type="text" name="q" value={q ?? ''} placeholder="jane@example.com" />
+        </label>
+        <label>
+          Status
+          <input type="text" name="status" value={status ?? ''} placeholder="new" />
+        </label>
+        <label>
+          English level
+          <select name="englishLevel">
+            <option value="" selected={!englishLevel}>Any</option>
+            <option value="basic" selected={englishLevel === 'basic'}>Basic</option>
+            <option value="intermediate" selected={englishLevel === 'intermediate'}>Intermediate</option>
+            <option value="advanced" selected={englishLevel === 'advanced'}>Advanced</option>
+            <option value="native" selected={englishLevel === 'native'}>Native</option>
+          </select>
+        </label>
+        <button type="submit">Filter</button>
+        {(q || status || englishLevel) && (
+          <a class="admin-filters-clear" href="/admin/applications">Clear</a>
+        )}
+      </form>
+
+      {
+        rows.length === 0 ? (
+          <p class="admin-empty">No applications match these filters.</p>
+        ) : (
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role experience</th>
+                <th>English level</th>
+                <th>Status</th>
+                <th>CV</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((application) => (
+                <tr>
+                  <td><a href={`/admin/applications/${application.id}`}>{application.name}</a></td>
+                  <td>{application.email}</td>
+                  <td>{truncate(application.roleExperience, 60)}</td>
+                  <td>{application.englishLevel}</td>
+                  <td>{application.status}</td>
+                  <td>
+                    <a href={`/admin/applications/${application.id}/cv`}>Download</a>
+                  </td>
+                  <td>{dateFormatter.format(application.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )
+      }
+
+      <div class="admin-pagination">
+        <a
+          href={hasPrev ? pageUrl(Astro.url, page - 1) : '#'}
+          class={!hasPrev ? 'admin-pagination-disabled' : ''}
+          aria-disabled={!hasPrev}
+        >
+          ← Previous
+        </a>
+        <span>Page {page} of {totalPages} ({total} total)</span>
+        <a
+          href={hasNext ? pageUrl(Astro.url, page + 1) : '#'}
+          class={!hasNext ? 'admin-pagination-disabled' : ''}
+          aria-disabled={!hasNext}
+        >
+          Next →
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
