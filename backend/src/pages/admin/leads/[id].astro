@@ -1,0 +1,65 @@
+---
+import { eq } from 'drizzle-orm';
+
+import AdminNav from '../../../components/AdminNav.astro';
+import { db, leads } from '../../../db';
+import { ensureCsrfToken } from '../../../lib/csrf';
+import { isUuid } from '../../../lib/ids';
+import '../../../styles/admin.css';
+
+// Guarded by src/middleware.ts — see admin/index.astro for why this
+// check is defensive, not a second auth boundary.
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+// `leads.id` is a Postgres `uuid` column — validate the shape BEFORE
+// querying so a malformed id (e.g. `/admin/leads/1`) falls through to
+// the same "not found" redirect below instead of Postgres throwing
+// `invalid input syntax for type uuid` as an unhandled 500.
+const { id } = Astro.params;
+const rows = id && isUuid(id) ? await db.select().from(leads).where(eq(leads.id, id)).limit(1) : [];
+const lead = rows[0];
+
+if (!lead) {
+  return Astro.redirect('/admin/leads');
+}
+
+const csrfToken = ensureCsrfToken(Astro.cookies);
+const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Lead — Zyeth Admin</title>
+  </head>
+  <body>
+    <div class="admin-shell">
+      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <a class="admin-back-link" href="/admin/leads">← Back to leads</a>
+      <h1>{lead.name}</h1>
+      <div class="admin-detail">
+        <dl>
+          <dt>Name</dt>
+          <dd>{lead.name}</dd>
+          <dt>Email</dt>
+          <dd>{lead.email}</dd>
+          <dt>Phone</dt>
+          <dd>{lead.phone ?? '—'}</dd>
+          <dt>Role</dt>
+          <dd>{lead.role}</dd>
+          <dt>Expected rate</dt>
+          <dd>{lead.expectedRate ?? '—'}</dd>
+          <dt>Source</dt>
+          <dd>{lead.source}</dd>
+          <dt>Created</dt>
+          <dd>{dateFormatter.format(lead.createdAt)}</dd>
+        </dl>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+---
+import { and, desc, ilike, or, sql } from 'drizzle-orm';
+
+import AdminNav from '../../../components/AdminNav.astro';
+import { db, leads } from '../../../db';
+import { ensureCsrfToken } from '../../../lib/csrf';
+import { PAGE_SIZE, pageUrl, parseFilter, parsePage } from '../../../lib/list-query';
+import '../../../styles/admin.css';
+
+// Guarded by src/middleware.ts — see admin/index.astro for why this
+// check is defensive, not a second auth boundary.
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+const csrfToken = ensureCsrfToken(Astro.cookies);
+
+// Filters are plain substring, case-insensitive matches (ilike) — leads
+// has no status/workflow field (see schema.ts) and `role`/`expectedRate`
+// are free text from the public contact form, so there's no fixed enum
+// to build a dropdown against.
+const q = parseFilter(Astro.url.searchParams, 'q');
+const role = parseFilter(Astro.url.searchParams, 'role');
+const page = parsePage(Astro.url.searchParams);
+
+const whereClause = and(
+  q ? or(ilike(leads.name, `%${q}%`), ilike(leads.email, `%${q}%`)) : undefined,
+  role ? ilike(leads.role, `%${role}%`) : undefined,
+);
+
+const [{ value: total }] = await db
+  .select({ value: sql<number>`count(*)`.mapWith(Number) })
+  .from(leads)
+  .where(whereClause);
+
+const rows = await db
+  .select()
+  .from(leads)
+  .where(whereClause)
+  .orderBy(desc(leads.createdAt))
+  .limit(PAGE_SIZE)
+  .offset((page - 1) * PAGE_SIZE);
+
+const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+const hasPrev = page > 1;
+const hasNext = page < totalPages;
+
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Leads — Zyeth Admin</title>
+  </head>
+  <body>
+    <div class="admin-shell">
+      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <h1>Leads</h1>
+
+      <form class="admin-filters" method="GET">
+        <label>
+          Search (name or email)
+          <input type="text" name="q" value={q ?? ''} placeholder="jane@example.com" />
+        </label>
+        <label>
+          Role
+          <input type="text" name="role" value={role ?? ''} placeholder="Frontend Developer" />
+        </label>
+        <button type="submit">Filter</button>
+        {(q || role) && <a class="admin-filters-clear" href="/admin/leads">Clear</a>}
+      </form>
+
+      {
+        rows.length === 0 ? (
+          <p class="admin-empty">No leads match these filters.</p>
+        ) : (
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Expected rate</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((lead) => (
+                <tr>
+                  <td><a href={`/admin/leads/${lead.id}`}>{lead.name}</a></td>
+                  <td>{lead.email}</td>
+                  <td>{lead.phone ?? '—'}</td>
+                  <td>{lead.role}</td>
+                  <td>{lead.expectedRate ?? '—'}</td>
+                  <td>{dateFormatter.format(lead.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )
+      }
+
+      <div class="admin-pagination">
+        <a
+          href={hasPrev ? pageUrl(Astro.url, page - 1) : '#'}
+          class={!hasPrev ? 'admin-pagination-disabled' : ''}
+          aria-disabled={!hasPrev}
+        >
+          ← Previous
+        </a>
+        <span>Page {page} of {totalPages} ({total} total)</span>
+        <a
+          href={hasNext ? pageUrl(Astro.url, page + 1) : '#'}
+          class={!hasNext ? 'admin-pagination-disabled' : ''}
+          aria-disabled={!hasNext}
+        >
+          Next →
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

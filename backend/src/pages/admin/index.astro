@@ -1,5 +1,10 @@
 ---
+import { sql } from 'drizzle-orm';
+
+import AdminNav from '../../components/AdminNav.astro';
+import { db, leads, talentApplications } from '../../db';
 import { ensureCsrfToken } from '../../lib/csrf';
+import '../../styles/admin.css';
 
 // Guarded by src/middleware.ts — Astro.locals.user is always set by the
 // time this page renders (the guard redirects to /admin/login
@@ -12,9 +17,15 @@ if (!user) {
 
 const csrfToken = ensureCsrfToken(Astro.cookies);
 
-// This is a minimal placeholder landing page to prove the auth guard +
-// session flow work end to end. The real dashboard (submissions list,
-// etc.) is #31 — not built here.
+// Simple totals for the landing cards — no filtering, just "how many
+// rows exist" as an at-a-glance count. The real lists (with search +
+// filters) live at /admin/leads and /admin/applications.
+const [{ value: leadsCount }] = await db
+  .select({ value: sql<number>`count(*)`.mapWith(Number) })
+  .from(leads);
+const [{ value: applicationsCount }] = await db
+  .select({ value: sql<number>`count(*)`.mapWith(Number) })
+  .from(talentApplications);
 ---
 
 <html lang="en">
@@ -25,14 +36,23 @@ const csrfToken = ensureCsrfToken(Astro.cookies);
     <title>Admin — Zyeth</title>
   </head>
   <body>
-    <main style="max-width: 32rem; margin: 4rem auto; font-family: system-ui, sans-serif;">
-      <h1>Zyeth Admin</h1>
-      <p>Signed in as {user.email}</p>
-      <form method="POST" action="/admin/logout">
-        <input type="hidden" name="csrfToken" value={csrfToken} />
-        <button type="submit">Log out</button>
-      </form>
-      <p><em>The submissions dashboard lands in a later issue (#31).</em></p>
-    </main>
+    <div class="admin-shell">
+      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <h1>Dashboard</h1>
+      <div class="admin-card-row">
+        <div class="admin-card">
+          <a href="/admin/leads">
+            <h2>Leads</h2>
+            <div class="admin-card-count">{leadsCount}</div>
+          </a>
+        </div>
+        <div class="admin-card">
+          <a href="/admin/applications">
+            <h2>Applications</h2>
+            <div class="admin-card-count">{applicationsCount}</div>
+          </a>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

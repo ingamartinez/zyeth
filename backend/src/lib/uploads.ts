@@ -35,7 +35,10 @@ function getMaxCvBytes(): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_CV_BYTES;
 }
 
-function getUploadsDir(): string {
+// Exported so the authenticated CV download route (#31) can resolve the
+// exact same directory for its path-traversal guard — a single source of
+// truth instead of a second './uploads' default living somewhere else.
+export function getUploadsDir(): string {
   return process.env.UPLOADS_DIR ?? './uploads';
 }
 

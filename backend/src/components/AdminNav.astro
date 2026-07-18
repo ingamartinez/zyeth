@@ -1,0 +1,23 @@
+---
+// Shared top nav for every authenticated /admin/* page (#31). Pulled out
+// of index.astro so the dashboard, leads, and applications pages don't
+// each hand-roll the same links + logout form.
+interface Props {
+  email: string;
+  csrfToken: string;
+}
+
+const { email, csrfToken } = Astro.props;
+---
+
+<nav class="admin-nav">
+  <a href="/admin">Dashboard</a>
+  <a href="/admin/leads">Leads</a>
+  <a href="/admin/applications">Applications</a>
+  <span class="admin-nav-spacer"></span>
+  <span class="admin-nav-user">Signed in as {email}</span>
+  <form method="POST" action="/admin/logout">
+    <input type="hidden" name="csrfToken" value={csrfToken} />
+    <button type="submit">Log out</button>
+  </form>
+</nav>
