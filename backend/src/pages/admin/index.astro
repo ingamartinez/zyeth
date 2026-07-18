@@ -1,0 +1,38 @@
+---
+import { ensureCsrfToken } from '../../lib/csrf';
+
+// Guarded by src/middleware.ts — Astro.locals.user is always set by the
+// time this page renders (the guard redirects to /admin/login
+// otherwise). The check below is just defensive/type-narrowing, not a
+// second auth boundary.
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+const csrfToken = ensureCsrfToken(Astro.cookies);
+
+// This is a minimal placeholder landing page to prove the auth guard +
+// session flow work end to end. The real dashboard (submissions list,
+// etc.) is #31 — not built here.
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin — Zyeth</title>
+  </head>
+  <body>
+    <main style="max-width: 32rem; margin: 4rem auto; font-family: system-ui, sans-serif;">
+      <h1>Zyeth Admin</h1>
+      <p>Signed in as {user.email}</p>
+      <form method="POST" action="/admin/logout">
+        <input type="hidden" name="csrfToken" value={csrfToken} />
+        <button type="submit">Log out</button>
+      </form>
+      <p><em>The submissions dashboard lands in a later issue (#31).</em></p>
+    </main>
+  </body>
+</html>

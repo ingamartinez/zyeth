@@ -111,7 +111,47 @@ Add these to the per-env `.env` file (see `.env.example`):
 | `UPLOADS_DIR` | `./uploads` | Where CVs are stored. In prod, use `/srv/zyeth-backend/{env}/uploads`. Created on demand with `0700` perms; **never web-served**. |
 | `MAX_CV_BYTES` | `5242880` (5 MB) | Max accepted CV size, checked against the actual buffered byte length (not the `Content-Length` header). Oversized uploads get `413`. |
 | `ALLOWED_ORIGINS` | `https://zyeth.work,https://staging.zyeth.work` | Comma-separated CORS allowlist for `/api/leads` and `/api/applications`. |
+| `NODE_ENV` | (unset) | Set to `production` in staging/prod. Gates the `secure` flag on the session and CSRF cookies (`src/lib/session.ts`, `src/lib/csrf.ts`) — cookies are only marked `secure` when this is `production`, so local `astro dev` over plain http still works. |
 
 Client IP for rate limiting is derived from `X-Forwarded-For`, on the
 assumption that this service is only ever reached through the Caddy
 reverse proxy on the same host (see `src/lib/rate-limit.ts`).
+
+## Admin auth
+
+`/admin/*` is a session-guarded dashboard for the single admin user (see
+`src/middleware.ts`, `src/lib/{auth,session,csrf}.ts`,
+`src/pages/admin/{login,logout,index}`):
+
+- Passwords are hashed with argon2id, falling back to bcrypt if argon2's
+  native build fails to load in a given environment (`src/lib/auth.ts`).
+- Sessions are server-side rows (`sessions` table) keyed by an opaque
+  256-bit token, set as an httpOnly, `sameSite=lax` cookie; 7-day TTL,
+  expirable and revocable (`src/lib/session.ts`).
+- `/admin/login` (login POST) and `/admin/logout` are protected by an
+  app-level double-submit CSRF token (`src/lib/csrf.ts`) — see
+  `astro.config.mjs` for why this is separate from Astro's built-in
+  `security.checkOrigin`, which stays disabled globally for the public
+  submission endpoints above.
+- Login is rate-limited separately from the public submission endpoints
+  (5 attempts / 15 min per IP, `checkLoginRateLimit` in
+  `src/lib/rate-limit.ts`).
+
+### Seeding the admin user
+
+There is no automated seed script (deliberately manual for now). Generate
+a real argon2id hash and insert the row directly, e.g.:
+
+```sh
+node -e "
+const argon2 = require('argon2');
+argon2.hash('YOUR_PASSWORD', { type: argon2.argon2id }).then(console.log);
+"
+```
+
+Then:
+
+```sql
+INSERT INTO users (email, password_hash)
+VALUES ('admin@example.com', 'PASTE_THE_HASH_HERE');
+```
