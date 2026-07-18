@@ -64,6 +64,23 @@ export const ui = {
     "hero.card.barZyethValue": "$3,150",
     "hero.footnote": "One of 40+ operators vetted this month — you only ever see the shortlist.",
     "hero.footnoteExample": "Example profile · illustrative rates",
+
+    // Home — trust band
+    "trust.aria": "Why US teams work with Zyeth",
+    "trust.timezone.title": "Same workday, in real time",
+    "trust.timezone.body":
+      "Your team is ≤ 1 hour behind New York — no overnight handoffs, no waiting until tomorrow for an answer.",
+    "trust.vetting.title": "Vetted before you meet them",
+    "trust.vetting.body":
+      "English, hands-on experience, and references are checked up front. You only ever see the shortlist.",
+    "trust.model.title": "The first 3 months through Zyeth",
+    "trust.model.body":
+      "We carry payroll and compliance while the fit proves itself — convert to your team when you're sure.",
+    "trust.industriesLabel": "Built for US operations teams in",
+    "trust.industry1": "Logistics & freight",
+    "trust.industry2": "E-commerce",
+    "trust.industry3": "Manufacturing",
+    "trust.industry4": "3PL & fulfillment",
   },
   es: {
     "site.name": "Zyeth",
@@ -117,6 +134,23 @@ export const ui = {
     "hero.card.barZyethValue": "$3,150",
     "hero.footnote": "Uno de más de 40 operadores verificados este mes — solo ves la preselección.",
     "hero.footnoteExample": "Perfil de ejemplo · tarifas ilustrativas",
+
+    // Home — trust band
+    "trust.aria": "Por qué los equipos de EE. UU. trabajan con Zyeth",
+    "trust.timezone.title": "El mismo día laboral, en tiempo real",
+    "trust.timezone.body":
+      "Tu equipo está a ≤ 1 hora de Nueva York — sin entregas de un día para otro, sin esperar hasta mañana por una respuesta.",
+    "trust.vetting.title": "Verificados antes de que los conozcas",
+    "trust.vetting.body":
+      "Inglés, experiencia real y referencias se chequean de antemano. Solo ves la preselección.",
+    "trust.model.title": "Los primeros 3 meses a través de Zyeth",
+    "trust.model.body":
+      "Nos hacemos cargo de la nómina y el cumplimiento mientras el encaje se demuestra — pasalos a tu equipo cuando estés seguro.",
+    "trust.industriesLabel": "Hecho para equipos de operaciones de EE. UU. en",
+    "trust.industry1": "Logística y transporte",
+    "trust.industry2": "E-commerce",
+    "trust.industry3": "Manufactura",
+    "trust.industry4": "3PL y fulfillment",
   },
 } as const;
 
