@@ -1,24 +1,21 @@
 {
-  "name": "zyeth",
+  "name": "@zyeth/backend",
   "type": "module",
   "version": "0.0.1",
+  "private": true,
   "engines": {
     "node": ">=22.12.0"
   },
-  "workspaces": [
-    "backend"
-  ],
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "start": "node ./dist/server/entry.mjs",
+    "check": "astro check",
     "astro": "astro"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.8",
-    "@fontsource/poppins": "^5.2.7",
-    "@tailwindcss/vite": "^4.3.3",
-    "astro": "^7.1.1",
-    "tailwindcss": "^4.3.3"
+    "@astrojs/node": "^11.0.2",
+    "astro": "^7.1.1"
   }
 }
