@@ -1,0 +1,430 @@
+---
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+// Mock, fully-loaded MONTHLY cost (USD) per role: equivalent US hire vs. Zyeth.
+// Marked "example" in the UI until real rates arrive (see issue #6).
+// role1 mirrors the hero's example candidate ($7,300 vs $3,150) for consistency.
+const roles = [
+  { id: "logistics", label: t("compare.role1"), us: 7300, zyeth: 3150 },
+  { id: "payables", label: t("compare.role2"), us: 6400, zyeth: 2800 },
+  { id: "ops", label: t("compare.role3"), us: 9800, zyeth: 4300 },
+  { id: "support", label: t("compare.role4"), us: 5200, zyeth: 2250 },
+  { id: "procurement", label: t("compare.role5"), us: 7600, zyeth: 3300 },
+  { id: "data", label: t("compare.role6"), us: 8100, zyeth: 3500 },
+] as const;
+
+// USD is a US cost, so format en-US in both locales (matches the hero: "$7,300").
+const usd = (n: number) => "$" + n.toLocaleString("en-US");
+const savePct = (r: { us: number; zyeth: number }) =>
+  Math.round((1 - r.zyeth / r.us) * 100);
+const zyethWidth = (r: { us: number; zyeth: number }) =>
+  Math.round((r.zyeth / r.us) * 100);
+
+// Server-rendered defaults (progressive enhancement: correct before JS runs).
+const first = roles[0];
+const annualTpl = t("compare.annual"); // contains "{v}"
+const annualDefault = annualTpl.replace("{v}", usd((first.us - first.zyeth) * 12));
+---
+
+<section class="compare" aria-labelledby="compare-heading">
+  <div class="compare-wrap mx-auto max-w-7xl px-4 sm:px-6">
+    <div class="compare-head reveal">
+      <span class="compare-eyebrow">{t("compare.eyebrow")}</span>
+      <h2 id="compare-heading" class="compare-title">{t("compare.heading")}</h2>
+      <p class="compare-intro">{t("compare.intro")}</p>
+    </div>
+
+    <div class="compare-panel reveal" style="--i:1">
+      <fieldset class="role-select">
+        <legend class="role-legend">{t("compare.selectLabel")}</legend>
+        <div class="role-pills">
+          {
+            roles.map((role, i) => (
+              <label class="pill">
+                <input
+                  type="radio"
+                  name="compare-role"
+                  value={role.id}
+                  data-us={role.us}
+                  data-zyeth={role.zyeth}
+                  checked={i === 0}
+                />
+                <span>{role.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="viz">
+        <div class="viz-bars" aria-live="polite">
+          <div class="bar-row">
+            <span class="bar-lab">{t("compare.usLabel")}</span>
+            <span class="bar us"><i style="width:100%"></i></span>
+            <span class="bar-val us" data-role="us-val">{usd(first.us)}</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-lab">{t("compare.zyethLabel")}</span>
+            <span class="bar zyeth">
+              <i data-role="zyeth-bar" style={`width:${zyethWidth(first)}%`}></i>
+            </span>
+            <span class="bar-val zyeth" data-role="zyeth-val">{usd(first.zyeth)}</span>
+          </div>
+          <p class="bar-unit">{t("compare.perMonth")}</p>
+        </div>
+
+        <div class="viz-save" data-annual-tpl={annualTpl}>
+          <span class="save-lab">{t("compare.saveLabel")}</span>
+          <span class="save-pct" data-role="save-pct">{savePct(first)}%</span>
+          <span class="save-annual" data-role="save-annual">{annualDefault}</span>
+        </div>
+      </div>
+
+      <p class="compare-note">
+        <span class="note-tag">{t("compare.exampleTag")}</span>
+        {t("compare.note")}
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  const section = document.querySelector<HTMLElement>(".compare");
+  if (section) {
+    const usd = (n: number) => "$" + n.toLocaleString("en-US");
+
+    const usVal = section.querySelector<HTMLElement>('[data-role="us-val"]')!;
+    const zyethVal = section.querySelector<HTMLElement>('[data-role="zyeth-val"]')!;
+    const zyethBar = section.querySelector<HTMLElement>('[data-role="zyeth-bar"]')!;
+    const savePct = section.querySelector<HTMLElement>('[data-role="save-pct"]')!;
+    const saveAnnual = section.querySelector<HTMLElement>('[data-role="save-annual"]')!;
+    const annualTpl =
+      section.querySelector<HTMLElement>(".viz-save")?.dataset.annualTpl ?? "{v}";
+
+    const update = (input: HTMLInputElement) => {
+      const us = Number(input.dataset.us);
+      const zyeth = Number(input.dataset.zyeth);
+      if (!us || !zyeth) return;
+      usVal.textContent = usd(us);
+      zyethVal.textContent = usd(zyeth);
+      zyethBar.style.width = Math.round((zyeth / us) * 100) + "%";
+      savePct.textContent = Math.round((1 - zyeth / us) * 100) + "%";
+      saveAnnual.textContent = annualTpl.replace("{v}", usd((us - zyeth) * 12));
+    };
+
+    section
+      .querySelectorAll<HTMLInputElement>('input[name="compare-role"]')
+      .forEach((input) =>
+        input.addEventListener("change", () => input.checked && update(input)),
+      );
+
+    // Reveal on scroll (section sits below the fold).
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = section.querySelectorAll<HTMLElement>(".reveal");
+    if (reduce || !("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("in"));
+    } else {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("in");
+              obs.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.2 },
+      );
+      items.forEach((el) => io.observe(el));
+    }
+  }
+</script>
+
+<style>
+  .compare {
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+  .compare-wrap {
+    padding-top: 76px;
+    padding-bottom: 80px;
+  }
+
+  /* ---------- heading ---------- */
+  .compare-head {
+    max-width: 640px;
+    margin-bottom: 36px;
+  }
+  .compare-eyebrow {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brand-teal);
+    margin-bottom: 12px;
+  }
+  .compare-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    margin: 0 0 14px;
+  }
+  .compare-intro {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    margin: 0;
+  }
+
+  /* ---------- panel ---------- */
+  .compare-panel {
+    background: #fff;
+    border: 1px solid #e3ebe5;
+    border-radius: 22px;
+    padding: 26px 28px 24px;
+    box-shadow: 0 18px 46px -26px rgba(10, 42, 37, 0.4);
+  }
+
+  /* ---------- role selector ---------- */
+  .role-select {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-inline-size: 0;
+  }
+  .role-legend {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding: 0;
+    margin-bottom: 12px;
+  }
+  .role-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+  .pill {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+  }
+  .pill input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .pill span {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1;
+    padding: 10px 15px;
+    border-radius: 999px;
+    color: var(--color-ink);
+    background: #f1f5f0;
+    border: 1px solid #e1e9e2;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  }
+  .pill:hover span {
+    border-color: var(--color-brand-teal);
+  }
+  .pill input:checked + span {
+    color: #06231f;
+    background: linear-gradient(135deg, var(--color-brand-teal), var(--color-brand-lime));
+    border-color: transparent;
+  }
+  .pill input:focus-visible + span {
+    outline: 2px solid var(--color-brand-teal);
+    outline-offset: 2px;
+  }
+
+  /* ---------- viz ---------- */
+  .viz {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 34px;
+    align-items: center;
+    margin-top: 26px;
+    padding: 24px;
+    background: #f6f8f5;
+    border: 1px solid #e7ede4;
+    border-radius: 16px;
+  }
+  .viz-bars {
+    display: grid;
+    gap: 14px;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 130px 1fr auto;
+    align-items: center;
+    gap: 16px;
+  }
+  .bar-lab {
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+  .bar {
+    height: 14px;
+    border-radius: 999px;
+    background: #e7ede4;
+    overflow: hidden;
+  }
+  .bar i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .bar.us i {
+    background: #c2ccc4;
+  }
+  .bar.zyeth i {
+    background: linear-gradient(90deg, var(--color-brand-teal), var(--color-brand-lime));
+  }
+  .bar-val {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.125rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+  }
+  .bar-val.us {
+    color: var(--color-muted);
+    font-weight: 600;
+  }
+  .bar-unit {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin: 2px 0 0;
+    text-align: right;
+  }
+
+  .viz-save {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    min-width: 150px;
+    padding: 18px 22px;
+    border-radius: 14px;
+    background: #eaf6e2;
+    border: 1px solid #d5ead0;
+    text-align: center;
+  }
+  .save-lab {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #3f7d2e;
+  }
+  .save-pct {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2.6rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #2f6a1f;
+    font-variant-numeric: tabular-nums;
+    margin: 4px 0 2px;
+  }
+  .save-annual {
+    font-size: 0.8rem;
+    color: #4a7a3a;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- note ---------- */
+  .compare-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    margin: 18px 2px 0;
+  }
+  .note-tag {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a6d00;
+    background: #fbeeb0;
+    border: 1px solid #f2df8a;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  /* ---------- motion ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: calc(var(--i, 0) * 0.1s);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .bar i {
+      transition: none;
+    }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 760px) {
+    .viz {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+    .viz-save {
+      justify-self: stretch;
+    }
+  }
+  @media (max-width: 560px) {
+    .compare-wrap {
+      padding-top: 52px;
+      padding-bottom: 56px;
+    }
+    .compare-panel {
+      padding: 22px 18px 20px;
+    }
+    .viz {
+      padding: 18px;
+    }
+    .bar-row {
+      grid-template-columns: 1fr;
+      gap: 5px;
+    }
+    .bar-val {
+      justify-self: start;
+    }
+    .bar-unit {
+      text-align: left;
+    }
+  }
+</style>
