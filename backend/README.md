@@ -77,3 +77,41 @@ npm run db:studio -w @zyeth/backend
 ```
 
 Generated migration files live in `drizzle/` and are committed to the repo.
+
+## Public submission API
+
+Two unauthenticated endpoints accept public submissions and persist them:
+
+- `POST /api/leads` — JSON body (`name`, `email`, `phone?`, `role`,
+  `expectedRate?`). Inserts a `leads` row with `source = 'contact_form'`.
+- `POST /api/applications` — `multipart/form-data` (`name`, `email`,
+  `roleExperience`, `englishLevel`, plus a `cv` file). Validates the CV by
+  sniffing its real magic bytes (PDF/DOC/DOCX only, regardless of the
+  client-supplied filename or Content-Type), stores it under
+  `UPLOADS_DIR` with a UUID filename, and inserts a `talent_applications`
+  row.
+
+Both endpoints:
+
+- Reject requests with a **honeypot** field, `company`, non-empty. Bots
+  that fill it get a fake `201 { ok: true }` response with nothing
+  persisted — the frontend (#29) must render this field hidden and never
+  populate it for real users.
+- Enforce a per-IP rate limit (in-memory, ~10 submissions / 10 minutes,
+  shared across both endpoints) — `429` when exceeded.
+- Only send CORS headers (`Access-Control-Allow-Origin`) for origins in
+  `ALLOWED_ORIGINS`, without credentials.
+
+### New environment variables
+
+Add these to the per-env `.env` file (see `.env.example`):
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `UPLOADS_DIR` | `./uploads` | Where CVs are stored. In prod, use `/srv/zyeth-backend/{env}/uploads`. Created on demand with `0700` perms; **never web-served**. |
+| `MAX_CV_BYTES` | `5242880` (5 MB) | Max accepted CV size, checked against the actual buffered byte length (not the `Content-Length` header). Oversized uploads get `413`. |
+| `ALLOWED_ORIGINS` | `https://zyeth.work,https://staging.zyeth.work` | Comma-separated CORS allowlist for `/api/leads` and `/api/applications`. |
+
+Client IP for rate limiting is derived from `X-Forwarded-For`, on the
+assumption that this service is only ever reached through the Caddy
+reverse proxy on the same host (see `src/lib/rate-limit.ts`).

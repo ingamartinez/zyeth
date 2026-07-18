@@ -1,0 +1,57 @@
+import type { APIRoute } from 'astro';
+
+import { db, leads } from '../../db';
+import { handlePreflight, jsonResponse } from '../../lib/cors';
+import { checkRateLimit, getClientIp } from '../../lib/rate-limit';
+import { formatZodErrors, HONEYPOT_FIELD, leadSchema } from '../../lib/validation';
+
+// Public contact-form submission endpoint. See src/lib/{validation,cors,
+// rate-limit}.ts for the shared allowlist/limiter/schema logic — this
+// file is intentionally a thin wiring layer.
+
+export const OPTIONS: APIRoute = handlePreflight;
+
+export const POST: APIRoute = async ({ request, clientAddress }) => {
+  const ip = getClientIp(request, clientAddress);
+  if (!checkRateLimit(ip)) {
+    return jsonResponse(
+      { ok: false, errors: [{ field: '(root)', message: 'Too many requests, try again later' }] },
+      429,
+      request,
+    );
+  }
+
+  let payload: unknown;
+  try {
+    payload = await request.json();
+  } catch {
+    return jsonResponse(
+      { ok: false, errors: [{ field: '(root)', message: 'Invalid JSON body' }] },
+      400,
+      request,
+    );
+  }
+
+  const parsed = leadSchema.safeParse(payload);
+  if (!parsed.success) {
+    return jsonResponse({ ok: false, errors: formatZodErrors(parsed.error) }, 400, request);
+  }
+
+  // Honeypot: bots that fill the hidden field get a fake success and
+  // nothing is persisted. See lib/validation.ts for the field name
+  // contract shared with the frontend.
+  if (parsed.data[HONEYPOT_FIELD]) {
+    return jsonResponse({ ok: true }, 201, request);
+  }
+
+  await db.insert(leads).values({
+    name: parsed.data.name,
+    email: parsed.data.email,
+    phone: parsed.data.phone,
+    role: parsed.data.role,
+    expectedRate: parsed.data.expectedRate,
+    source: 'contact_form',
+  });
+
+  return jsonResponse({ ok: true }, 201, request);
+};
