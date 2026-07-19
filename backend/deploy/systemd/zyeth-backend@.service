@@ -1,0 +1,22 @@
+[Unit]
+Description=Zyeth backend SSR (%i)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=zyeth
+Group=zyeth
+WorkingDirectory=/srv/zyeth-backend/%i/current
+EnvironmentFile=/etc/zyeth-backend/%i.env
+ExecStart=/opt/bun/bin/bun dist/server/entry.mjs
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/srv/zyeth-backend/%i
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
