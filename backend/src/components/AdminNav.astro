@@ -1,13 +1,16 @@
 ---
 // Shared top nav for every authenticated /admin/* page (#31). Pulled out
 // of index.astro so the dashboard, leads, and applications pages don't
-// each hand-roll the same links + logout form.
+// each hand-roll the same links + logout link.
+//
+// Logout is a plain GET link (#52) — identity is entirely owned by
+// Cloudflare Access now, so there is no app-level session to destroy via
+// a POST, and thus no CSRF token to carry here (see src/lib/csrf.ts).
 interface Props {
   email: string;
-  csrfToken: string;
 }
 
-const { email, csrfToken } = Astro.props;
+const { email } = Astro.props;
 ---
 
 <nav class="admin-nav">
@@ -16,8 +19,5 @@ const { email, csrfToken } = Astro.props;
   <a href="/admin/applications">Applications</a>
   <span class="admin-nav-spacer"></span>
   <span class="admin-nav-user">Signed in as {email}</span>
-  <form method="POST" action="/admin/logout">
-    <input type="hidden" name="csrfToken" value={csrfToken} />
-    <button type="submit">Log out</button>
-  </form>
+  <a href="/admin/logout">Log out</a>
 </nav>

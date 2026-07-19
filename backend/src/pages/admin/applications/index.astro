@@ -3,7 +3,6 @@ import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 
 import AdminNav from '../../../components/AdminNav.astro';
 import { db, talentApplications } from '../../../db';
-import { ensureCsrfToken } from '../../../lib/csrf';
 import { PAGE_SIZE, pageUrl, parseFilter, parsePage } from '../../../lib/list-query';
 import '../../../styles/admin.css';
 
@@ -11,10 +10,8 @@ import '../../../styles/admin.css';
 // check is defensive, not a second auth boundary.
 const user = Astro.locals.user;
 if (!user) {
-  return Astro.redirect('/admin/login');
+  return new Response('Forbidden', { status: 403 });
 }
-
-const csrfToken = ensureCsrfToken(Astro.cookies);
 
 // `status` and `englishLevel` are exact-match filters (dropdown-style
 // values in practice — englishLevel comes from a fixed select on the
@@ -68,7 +65,7 @@ function truncate(value: string, max: number): string {
   </head>
   <body>
     <div class="admin-shell">
-      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <AdminNav email={user.email} />
       <h1>Applications</h1>
 
       <form class="admin-filters" method="GET">

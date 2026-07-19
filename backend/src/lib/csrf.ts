@@ -1,14 +1,25 @@
 import crypto from 'node:crypto';
 import type { AstroCookies } from 'astro';
 
-// Double-submit CSRF token for admin mutating routes (login POST, logout
-// POST, and any future /admin mutations) — see backend/astro.config.mjs
-// for why this is handled at the app level instead of via Astro's
-// built-in `security.checkOrigin`: that check stays globally disabled
-// because POST /api/leads and POST /api/applications (#28) are
-// deliberately public, unauthenticated, cross-origin endpoints called
-// from the separate zyeth.work marketing site. Cookie-authenticated admin
-// routes need their own CSRF story instead, scoped to just those routes.
+// Double-submit CSRF token for admin mutating routes — see
+// backend/astro.config.mjs for why this is handled at the app level
+// instead of via Astro's built-in `security.checkOrigin`: that check
+// stays globally disabled because POST /api/leads and POST
+// /api/applications (#28) are deliberately public, unauthenticated,
+// cross-origin endpoints called from the separate zyeth.work marketing
+// site. Cookie-authenticated admin routes need their own CSRF story
+// instead, scoped to just those routes.
+//
+// CURRENTLY UNUSED (#52): the only two admin routes that ever mutated
+// state (POST /admin/login and POST /admin/logout) are both gone —
+// identity is now entirely owned by Cloudflare Access JWT verification
+// (src/lib/cf-access.ts, src/middleware.ts), and logout is a plain GET
+// link to CF Access's own logout URL. This module is retained,
+// deliberately not deleted, for the next /admin route that mutates state
+// (e.g. an application/lead status change) — a JWT in a header does NOT
+// substitute for CSRF protection on a cookie-authenticated mutation,
+// since the `CF_Authorization` cookie travels cross-site and Cloudflare
+// re-injects a valid JWT header regardless of request origin.
 const CSRF_COOKIE = 'csrf_token';
 
 // Returns the existing CSRF token from the cookie, or mints and sets a
@@ -24,9 +35,10 @@ const CSRF_COOKIE = 'csrf_token';
 // stronger (also unreadable to same-origin XSS), it doesn't break the
 // pattern.
 //
-// secure: `import.meta.env.PROD` — see lib/session.ts for why this is
-// fail-secure by construction (true in any real build, false only under
-// `astro dev`).
+// secure: `import.meta.env.PROD` — fail-secure by construction (true in
+// any real Astro build, false only under `astro dev`); it needs no
+// manually-provisioned env var, unlike gating on `process.env.NODE_ENV`,
+// which silently defaults to insecure if nothing ever sets it.
 //
 // path: '/admin' — scoped so this token is never sent on public /api/*
 // requests.

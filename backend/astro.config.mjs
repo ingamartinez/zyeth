@@ -21,12 +21,14 @@ export default defineConfig({
     // defenses here, so Astro's stricter same-origin default would just
     // block legitimate traffic.
     //
-    // #30 added authenticated (cookie/session) admin routes under
-    // /admin/*. Rather than re-enable this globally (which would break
-    // the public endpoints above), admin mutations get their OWN
-    // app-level CSRF story: a double-submit token (src/lib/csrf.ts)
-    // checked explicitly by the login and logout POST handlers, plus the
-    // session cookie's own `sameSite: 'lax'` flag (src/lib/session.ts).
+    // #30 added authenticated admin routes under /admin/*; #52 replaced
+    // the app-level password login with Cloudflare Access JWT
+    // verification (src/lib/cf-access.ts, src/middleware.ts) as the sole
+    // identity gate. Rather than re-enable this globally (which would
+    // break the public endpoints above), any future /admin mutation gets
+    // its OWN app-level CSRF story: a double-submit token
+    // (src/lib/csrf.ts), currently unused because there are no mutating
+    // /admin routes left (see csrf.ts for why the module stays regardless).
     // This stays `false` globally on purpose — do not flip it without
     // re-auditing the public submission endpoints.
     checkOrigin: false,

@@ -61,12 +61,9 @@ function createLimiter(windowMs: number, maxPerWindow: number) {
 // MAX_REQUESTS_PER_WINDOW submissions in the current window.
 export const checkRateLimit = createLimiter(WINDOW_MS, MAX_REQUESTS_PER_WINDOW);
 
-// Stricter, separate-budget limiter for POST /admin/login (#30) — brute
-// forcing the single admin password should be expensive. 5 attempts per
-// 15 minutes per IP; tune if this proves too tight/loose in practice.
-const LOGIN_WINDOW_MS = 15 * 60 * 1000;
-const MAX_LOGIN_ATTEMPTS_PER_WINDOW = 5;
-export const checkLoginRateLimit = createLimiter(LOGIN_WINDOW_MS, MAX_LOGIN_ATTEMPTS_PER_WINDOW);
+// NOTE: the #30 admin-login rate limiter (`checkLoginRateLimit`) was
+// removed in #52 along with the app-level password login it protected —
+// Cloudflare Access now owns brute-force protection for admin identity.
 
 // Extracts the client IP for rate-limit keying, honoring X-Forwarded-For.
 //

@@ -3,7 +3,6 @@ import { and, desc, ilike, or, sql } from 'drizzle-orm';
 
 import AdminNav from '../../../components/AdminNav.astro';
 import { db, leads } from '../../../db';
-import { ensureCsrfToken } from '../../../lib/csrf';
 import { PAGE_SIZE, pageUrl, parseFilter, parsePage } from '../../../lib/list-query';
 import '../../../styles/admin.css';
 
@@ -11,10 +10,8 @@ import '../../../styles/admin.css';
 // check is defensive, not a second auth boundary.
 const user = Astro.locals.user;
 if (!user) {
-  return Astro.redirect('/admin/login');
+  return new Response('Forbidden', { status: 403 });
 }
-
-const csrfToken = ensureCsrfToken(Astro.cookies);
 
 // Filters are plain substring, case-insensitive matches (ilike) — leads
 // has no status/workflow field (see schema.ts) and `role`/`expectedRate`
@@ -61,7 +58,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   </head>
   <body>
     <div class="admin-shell">
-      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <AdminNav email={user.email} />
       <h1>Leads</h1>
 
       <form class="admin-filters" method="GET">
