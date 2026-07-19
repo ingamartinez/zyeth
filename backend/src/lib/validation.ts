@@ -12,22 +12,32 @@ export const HONEYPOT_FIELD = 'company';
 // validating (see `formValue` in the applications route) — JSON bodies
 // already omit missing keys as `undefined` natively, so both input shapes
 // land here the same way.
-const trimmedRequired = (message: string) => z.string().trim().min(1, message);
-const trimmedOptional = () =>
+// `max` is mandatory on both helpers (no default) — every text field on a
+// public endpoint must have an explicit, deliberate length cap (#46). It's
+// defense-in-depth against payload abuse, and `name` also flows into the
+// outbound email subject (#32), where unbounded length can mangle it.
+const maxMessage = (max: number) => `must be ${max} characters or fewer`;
+const trimmedRequired = (message: string, max: number) =>
+  z.string().trim().min(1, message).max(max, maxMessage(max));
+const trimmedOptional = (max: number) =>
   z
     .string()
     .trim()
+    .max(max, maxMessage(max))
     .optional()
     .transform((value) => (value && value.length > 0 ? value : undefined));
-const email = (message: string) => z.string().trim().min(1, message).pipe(z.email(message));
+// RFC 5321 caps the full reverse-path/forward-path at 254 characters.
+const EMAIL_MAX = 254;
+const email = (message: string) =>
+  z.string().trim().min(1, message).max(EMAIL_MAX, maxMessage(EMAIL_MAX)).pipe(z.email(message));
 
 // POST /api/leads (JSON body).
 export const leadSchema = z.object({
-  name: trimmedRequired('name is required'),
+  name: trimmedRequired('name is required', 200),
   email: email('email must be a valid address'),
-  phone: trimmedOptional(),
-  role: trimmedRequired('role is required'),
-  expectedRate: trimmedOptional(),
+  phone: trimmedOptional(50),
+  role: trimmedRequired('role is required', 200),
+  expectedRate: trimmedOptional(100),
   [HONEYPOT_FIELD]: z.string().optional(),
 });
 
@@ -37,10 +47,10 @@ export type LeadInput = z.infer<typeof leadSchema>;
 // `cv` file itself is validated separately in `lib/uploads.ts`, since it
 // needs magic-byte sniffing rather than zod's string/number checks.
 export const applicationFieldsSchema = z.object({
-  name: trimmedRequired('name is required'),
+  name: trimmedRequired('name is required', 200),
   email: email('email must be a valid address'),
-  roleExperience: trimmedRequired('roleExperience is required'),
-  englishLevel: trimmedRequired('englishLevel is required'),
+  roleExperience: trimmedRequired('roleExperience is required', 5000),
+  englishLevel: trimmedRequired('englishLevel is required', 100),
   [HONEYPOT_FIELD]: z.string().optional(),
 });
 
