@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 
 import { db, leads } from '../../db';
 import { handlePreflight, jsonResponse } from '../../lib/cors';
+import { notifyNewSubmission } from '../../lib/notify';
 import { checkRateLimit, getClientIp } from '../../lib/rate-limit';
 import { formatZodErrors, HONEYPOT_FIELD, leadSchema } from '../../lib/validation';
 
@@ -51,6 +52,19 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     role: parsed.data.role,
     expectedRate: parsed.data.expectedRate,
     source: 'contact_form',
+  });
+
+  // Fire-and-forget: never await/block the response on the notification
+  // email. Failures are logged, not surfaced — see lib/notify.ts.
+  notifyNewSubmission('lead', {
+    name: parsed.data.name,
+    email: parsed.data.email,
+    phone: parsed.data.phone,
+    role: parsed.data.role,
+    expectedRate: parsed.data.expectedRate,
+    source: 'contact_form',
+  }).catch((err: unknown) => {
+    console.error('[notify] failed to send lead notification email', err);
   });
 
   return jsonResponse({ ok: true }, 201, request);

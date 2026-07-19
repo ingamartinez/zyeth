@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 
 import { db, talentApplications } from '../../db';
 import { handlePreflight, jsonResponse } from '../../lib/cors';
+import { notifyNewSubmission } from '../../lib/notify';
 import { checkRateLimit, getClientIp } from '../../lib/rate-limit';
 import { storeCv, validateCv } from '../../lib/uploads';
 import { applicationFieldsSchema, formatZodErrors, HONEYPOT_FIELD } from '../../lib/validation';
@@ -94,6 +95,18 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     cvPath,
     cvOriginalName: cv.name,
     cvMime: validated.mime,
+  });
+
+  // Fire-and-forget: never await/block the response on the notification
+  // email. Failures are logged, not surfaced — see lib/notify.ts.
+  notifyNewSubmission('application', {
+    name: parsed.data.name,
+    email: parsed.data.email,
+    roleExperience: parsed.data.roleExperience,
+    englishLevel: parsed.data.englishLevel,
+    cvOriginalName: cv.name,
+  }).catch((err: unknown) => {
+    console.error('[notify] failed to send application notification email', err);
   });
 
   return jsonResponse({ ok: true }, 201, request);

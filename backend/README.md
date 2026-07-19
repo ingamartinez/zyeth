@@ -111,6 +111,21 @@ Add these to the per-env `.env` file (see `.env.example`):
 | `UPLOADS_DIR` | `./uploads` | Where CVs are stored. In prod, use `/srv/zyeth-backend/{env}/uploads`. Created on demand with `0700` perms; **never web-served**. |
 | `MAX_CV_BYTES` | `5242880` (5 MB) | Max accepted CV size, checked against the actual buffered byte length (not the `Content-Length` header). Oversized uploads get `413`. |
 | `ALLOWED_ORIGINS` | `https://zyeth.work,https://staging.zyeth.work` | Comma-separated CORS allowlist for `/api/leads` and `/api/applications`. |
+| `SMTP_HOST` | _(none — required)_ | SMTP server host for new-submission notification emails (#32). Without it, `src/lib/notify.ts` is a silent no-op (logs one warning) — the submission API keeps working either way. |
+| `SMTP_PORT` | `587` | SMTP server port. |
+| `SMTP_SECURE` | `false` | Set to `true` for implicit TLS (typically port 465). Leave unset/`false` for STARTTLS on 587. |
+| `SMTP_USER` | _(none)_ | SMTP auth username. Optional — omit for an unauthenticated local relay. |
+| `SMTP_PASS` | _(none)_ | SMTP auth password. Optional, paired with `SMTP_USER`. |
+| `NOTIFY_EMAIL_FROM` | _(none — required)_ | `From` address for notification emails. |
+| `NOTIFY_EMAIL_TO` | _(none — required)_ | Internal recipient (Zyeth business owner) alerted on every new lead/application. Not a submitter confirmation. |
+
+`SMTP_HOST`, `NOTIFY_EMAIL_FROM` and `NOTIFY_EMAIL_TO` are all required for
+notifications to send; if any is missing, `notifyNewSubmission()` no-ops
+instead of throwing. Wiring real SMTP credentials into the per-env `.env` /
+systemd `EnvironmentFile=` is the host owner's job (same as `UPLOADS_DIR` /
+`MAX_CV_BYTES` / `ALLOWED_ORIGINS` above) — an agent sandbox cannot write
+`.env` files. A real end-to-end send (an email actually arriving) can only
+be verified manually once those credentials are provisioned.
 
 Client IP for rate limiting is derived from `X-Forwarded-For`, on the
 assumption that this service is only ever reached through the Caddy
