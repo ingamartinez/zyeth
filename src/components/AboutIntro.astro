@@ -65,7 +65,9 @@ const t = useTranslations(lang);
     font-size: 0.75rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-brand-teal);
+    /* On --color-surface bg — brand-teal fails 4.5:1 (2.53:1), use the
+       on-light token instead (WCAG AA, #13). */
+    color: var(--color-brand-teal-text);
     margin-bottom: 14px;
   }
   .about-intro-heading {

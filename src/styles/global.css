@@ -20,6 +20,16 @@
   --color-brand-green: #124944;
   --color-brand-green-dark: #0a2a25;
   --color-brand-teal: #2bafa3;
+  /* On-light text variant of brand-teal — #2bafa3 fails 4.5:1 on white/surface
+     (2.70:1 / 2.53:1). #15726a clears ≥4.5:1 on white, --color-surface, AND
+     the Hero "Save" pill's light-green bg. Do NOT use for on-dark contexts —
+     brand-teal itself already passes there (see AGENTS.md WCAG AA pass, #13). */
+  --color-brand-teal-text: #15726a;
+  /* On-light darkened variant of the savings green — #3f7d2e fails 4.5:1 on
+     both savings-pill backgrounds (4.33:1 on #e4f3d8, 4.49:1 on #eaf6e2).
+     #2f6220 clears ≥4.5:1 on both (6.27:1 / 6.50:1) while staying in the
+     green hue family — savings/discount semantics, not teal (#13). */
+  --color-brand-green-text: #2f6220;
   --color-brand-lime: #88b33f;
   --color-brand-gold: #f0c71d;
 

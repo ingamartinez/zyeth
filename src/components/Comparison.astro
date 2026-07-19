@@ -165,7 +165,9 @@ const annualDefault = annualTpl.replace("{v}", usd((first.us - first.zyeth) * 12
     font-size: 0.75rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-brand-teal);
+    /* On --color-surface bg — brand-teal fails 4.5:1 (2.53:1), use the
+       on-light token instead (WCAG AA, #13). */
+    color: var(--color-brand-teal-text);
     margin-bottom: 12px;
   }
   .compare-title {
@@ -331,7 +333,9 @@ const annualDefault = annualTpl.replace("{v}", usd((first.us - first.zyeth) * 12
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #3f7d2e;
+    /* #3f7d2e on #eaf6e2 was 4.49:1, under 4.5:1 (WCAG AA, #13). The
+       darkened --color-brand-green-text token clears 6.50:1 here. */
+    color: var(--color-brand-green-text);
   }
   .save-pct {
     font-family: var(--font-display);

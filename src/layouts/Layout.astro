@@ -65,6 +65,12 @@ const alternates = (Object.keys(languages) as Array<keyof typeof languages>).map
     <meta name="twitter:image" content={ogImage} />
   </head>
   <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:rounded-lg focus:bg-brand-green-dark focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:text-near-white"
+    >
+      {t("a11y.skipToContent")}
+    </a>
     <slot />
   </body>
 </html>
