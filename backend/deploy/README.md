@@ -196,7 +196,42 @@ and none of it is part of this repo's deploy pipeline.
    Caddy instance serving findash and photoshowcase too, so a syntax error
    in the appended block would take down every site on the host, not just
    admin.zyeth.work.
+
+   **Do NOT pre-create the access-log file as root.** The block's `log`
+   directive writes to `/var/log/caddy/zyeth-admin-access.log`. Caddy runs
+   as the `caddy` user and creates that file itself on first write with the
+   right ownership — leave it alone and let it happen. If the file must be
+   pre-created for some other reason (e.g. to pre-set log rotation
+   tooling), `chown caddy:caddy` it **immediately** after creating it:
+   ```sh
+   touch /var/log/caddy/zyeth-admin-access.log
+   chown caddy:caddy /var/log/caddy/zyeth-admin-access.log
+   ```
+   A `sudo touch` (or any root-owned redirect) leaves the file
+   `root:root 0600`. Caddy can't open a log file it doesn't own, so
+   **every** subsequent config reload fails at `loading new config: setting
+   up custom log ... permission denied` — not just for `admin.zyeth.work`,
+   for the whole shared Caddyfile. The service gets stuck in
+   `ActiveState=reloading` (the reload times out/gets killed roughly every
+   90s and retries), the `admin.zyeth.work` block never finishes loading,
+   and every request to it is served as an empty response
+   (`"msg":"NOP","status":0,"size":0` in the access log) — i.e. a **blank
+   page**, with no error visible to the browser. This exact failure mode
+   took `admin.zyeth.work` down for over a day on staging (see #51) before
+   the root cause was traced to file ownership rather than the app or
+   Cloudflare Access.
 4. **Verify**:
+   - After the `systemctl reload caddy` above, confirm the reload actually
+     succeeded before moving on:
+     ```sh
+     systemctl is-active caddy    # must print "active", not "reloading"
+     systemctl status caddy       # `Status:` line must show no error —
+                                   # in particular no "permission denied"
+     ```
+     If `is-active` reports anything other than `active`, or `status`
+     shows a `permission denied` (or any other) error in `Status:`, the
+     new config did **not** load — stop and fix that before touching DNS/
+     Access, the block above is not live yet.
    - `curl -I https://admin.zyeth.work` returns a valid TLS handshake and
      an app response (through the CF Access redirect for an unauthenticated
      request).
@@ -206,6 +241,14 @@ and none of it is part of this repo's deploy pipeline.
    - `zyeth.work`, `www.zyeth.work`, `staging.zyeth.work`, findash, and
      photoshowcase are all unaffected — confirm each still serves normally
      after the reload.
+
+   **Diagnostic signal for future debugging**: a `zyeth-admin-access.log`
+   (or any Caddy access log) line reading `"msg":"NOP","status":0` means
+   the reload wedged or failed and the block serving that log is not
+   actually loaded — the empty response is the symptom, not the cause.
+   Check `systemctl status caddy`'s `Status:` line for the actual
+   config-load error (e.g. `permission denied` opening a log file, or a
+   syntax error) rather than debugging the app or Cloudflare Access first.
 
 The DNS record, the Access policy, and the actual `caddy reload` on the
 droplet are **operator steps**, run outside this repo/CI. This repo only
