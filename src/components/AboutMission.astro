@@ -1,0 +1,113 @@
+---
+/**
+ * "Mission" section for the About page — dark, centered statement block.
+ * Mirrors the visual rhythm of ModelExplainer.astro's head block.
+ */
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<section class="about-mission" aria-labelledby="about-mission-heading">
+  <div class="about-mission-wrap mx-auto max-w-7xl px-4 sm:px-6">
+    <span class="about-mission-eyebrow reveal" style="--i:0">{t("about.mission.eyebrow")}</span>
+    <h2 id="about-mission-heading" class="about-mission-heading reveal" style="--i:1">
+      {t("about.mission.heading")}
+    </h2>
+    <p class="about-mission-body reveal" style="--i:2">{t("about.mission.body")}</p>
+  </div>
+</section>
+
+<script>
+  const section = document.querySelector<HTMLElement>(".about-mission");
+  if (section) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const items = section.querySelectorAll<HTMLElement>(".reveal");
+    if (reduce || !("IntersectionObserver" in window)) {
+      items.forEach((el) => el.classList.add("in"));
+    } else {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("in");
+              obs.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.2 },
+      );
+      items.forEach((el) => io.observe(el));
+    }
+  }
+</script>
+
+<style>
+  .about-mission {
+    background: var(--color-brand-green-dark);
+    color: var(--color-near-white);
+  }
+  .about-mission-wrap {
+    padding-top: 80px;
+    padding-bottom: 84px;
+    max-width: 720px;
+    text-align: center;
+  }
+  .about-mission-eyebrow {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-brand-teal);
+    margin-bottom: 16px;
+  }
+  .about-mission-heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    line-height: 1.16;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: #fff;
+    margin: 0 0 22px;
+  }
+  .about-mission-body {
+    font-size: 1.05rem;
+    line-height: 1.68;
+    color: var(--color-near-white);
+    opacity: 0.84;
+    margin: 0 auto;
+  }
+
+  /* ---------- motion ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: calc(var(--i, 0) * 0.08s);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 560px) {
+    .about-mission-wrap {
+      padding-top: 56px;
+      padding-bottom: 60px;
+    }
+  }
+</style>

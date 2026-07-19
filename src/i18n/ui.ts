@@ -256,6 +256,52 @@ export const ui = {
     "careers.form.error.generic":
       "Something went wrong and we couldn't submit your application. Please try again later.",
 
+    // About — page meta
+    "about.meta.title": "About us",
+    "about.meta.description":
+      "Zyeth connects US operations teams with curated, vetted talent in Medellín — same timezone, hand-picked, and ready to work.",
+
+    // About — page hero
+    "about.hero.eyebrow": "About Zyeth",
+    "about.hero.h1": "Curated talent, built on trust",
+    "about.hero.subtitle":
+      "We connect US operations teams with hand-picked, English-fluent talent in Medellín — vetted before you ever see a résumé.",
+
+    // About — who we are
+    "about.intro.eyebrow": "Who we are",
+    "about.intro.heading": "A curated bridge between US teams and Colombian talent",
+    "about.intro.body1":
+      "Zyeth exists because hiring shouldn't mean sorting through hundreds of résumés hoping to find the right fit. We built a recruiting operation focused on one region — Medellín, Colombia — and one outcome: operators who are ready to work on US operations teams from day one.",
+    "about.intro.body2":
+      "We work in your timezone, speak your language, and understand the roles we place — logistics, payables, and operations support — because we've built our own process around them.",
+
+    // About — mission
+    "about.mission.eyebrow": "Our mission",
+    "about.mission.heading":
+      "Make hiring across borders feel as safe as hiring down the hall",
+    "about.mission.body":
+      "Every operator we place has been checked before you meet them — English, hands-on experience, and references verified up front. We carry payroll and compliance for the first three months so the fit proves itself before it's permanent. That's the standard we hold every placement to.",
+
+    // About — how we curate (vetting)
+    "about.vetting.eyebrow": "How we curate",
+    "about.vetting.heading": "Every candidate earns their spot on the shortlist",
+    "about.vetting.intro":
+      "Curated isn't a marketing word for us — it's the process. Before anyone reaches your inbox, they clear three checks.",
+    "about.vetting.pillar1.title": "English fluency, verified",
+    "about.vetting.pillar1.body":
+      "We assess spoken and written English directly — not a self-reported checkbox — so communication is never the risk.",
+    "about.vetting.pillar2.title": "Hands-on experience, confirmed",
+    "about.vetting.pillar2.body":
+      "We screen for real, role-specific experience — the tools, workflows, and judgment the job actually requires.",
+    "about.vetting.pillar3.title": "References, checked",
+    "about.vetting.pillar3.body":
+      "We speak with past employers or clients before a candidate reaches your shortlist — not after you've already hired them.",
+
+    // About — closing CTA
+    "about.cta.heading": "Ready to meet your shortlist?",
+    "about.cta.body":
+      "Tell us the role you're hiring for and we'll bring you curated, vetted candidates — not a stack of résumés.",
+
     // Shared — honeypot field (hidden from real users, never localized visually)
     "honeypot.label": "Leave this field blank",
   },
@@ -502,6 +548,52 @@ export const ui = {
     "careers.form.error.rateLimit": "Demasiados intentos — probá de nuevo en unos minutos.",
     "careers.form.error.generic":
       "Algo salió mal y no pudimos enviar tu postulación. Probá de nuevo más tarde.",
+
+    // Nosotros — meta de la página
+    "about.meta.title": "Nosotros",
+    "about.meta.description":
+      "Zyeth conecta equipos de operaciones de EE. UU. con talento curado y verificado en Medellín — mismo horario, elegido a mano y listo para trabajar.",
+
+    // Nosotros — hero de página
+    "about.hero.eyebrow": "Sobre Zyeth",
+    "about.hero.h1": "Talento curado, construido sobre confianza",
+    "about.hero.subtitle":
+      "Conectamos equipos de operaciones de EE. UU. con talento elegido a mano y con inglés fluido en Medellín — verificado antes de que veas un currículum.",
+
+    // Nosotros — quiénes somos
+    "about.intro.eyebrow": "Quiénes somos",
+    "about.intro.heading": "Un puente curado entre equipos de EE. UU. y talento colombiano",
+    "about.intro.body1":
+      "Zyeth existe porque contratar no debería significar revisar cientos de currículums esperando encontrar el encaje correcto. Armamos una operación de reclutamiento enfocada en una región — Medellín, Colombia — y un solo resultado: operadores listos para trabajar en equipos de operaciones de EE. UU. desde el primer día.",
+    "about.intro.body2":
+      "Trabajamos en tu horario, hablamos tu idioma y entendemos los roles que ubicamos — logística, cuentas por pagar y soporte de operaciones — porque construimos todo nuestro proceso alrededor de ellos.",
+
+    // Nosotros — misión
+    "about.mission.eyebrow": "Nuestra misión",
+    "about.mission.heading":
+      "Que contratar del otro lado de la frontera se sienta tan seguro como contratar en tu propia oficina",
+    "about.mission.body":
+      "Cada operador que ubicamos fue verificado antes de que lo conozcas — inglés, experiencia real y referencias chequeadas de antemano. Nos hacemos cargo de la nómina y el cumplimiento durante los primeros tres meses para que el encaje se demuestre antes de ser definitivo. Ese es el estándar que sostenemos en cada contratación.",
+
+    // Nosotros — cómo curamos (vetting)
+    "about.vetting.eyebrow": "Cómo curamos",
+    "about.vetting.heading": "Cada candidato se gana su lugar en la preselección",
+    "about.vetting.intro":
+      "Curado no es una palabra de marketing para nosotros — es el proceso. Antes de que alguien llegue a tu bandeja de entrada, pasa tres chequeos.",
+    "about.vetting.pillar1.title": "Inglés fluido, verificado",
+    "about.vetting.pillar1.body":
+      "Evaluamos el inglés hablado y escrito de forma directa — no es una casilla autodeclarada — para que la comunicación nunca sea el riesgo.",
+    "about.vetting.pillar2.title": "Experiencia real, confirmada",
+    "about.vetting.pillar2.body":
+      "Filtramos por experiencia real y específica del rol — las herramientas, los flujos de trabajo y el criterio que el puesto realmente exige.",
+    "about.vetting.pillar3.title": "Referencias, chequeadas",
+    "about.vetting.pillar3.body":
+      "Hablamos con empleadores o clientes anteriores antes de que un candidato llegue a tu preselección — no después de que ya lo contrataste.",
+
+    // Nosotros — CTA de cierre
+    "about.cta.heading": "¿Listo para conocer tu preselección?",
+    "about.cta.body":
+      "Contanos qué rol estás buscando y te traemos candidatos curados y verificados — no una pila de currículums.",
 
     // Compartido — campo honeypot (oculto para usuarios reales, sin localización visual)
     "honeypot.label": "Dejá este campo vacío",
