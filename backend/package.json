@@ -19,18 +19,16 @@
   },
   "dependencies": {
     "@astrojs/node": "^11.0.2",
-    "argon2": "^0.44.0",
     "astro": "^7.1.1",
-    "bcrypt": "^6.0.0",
     "drizzle-orm": "^0.45.2",
     "file-type": "^22.0.1",
+    "jose": "^6.1.0",
     "nodemailer": "^9.0.3",
     "postgres": "^3.4.9",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@types/bcrypt": "^6.0.0",
     "@types/node": "^26.1.1",
     "@types/nodemailer": "^8.0.1",
     "drizzle-kit": "^0.31.10",

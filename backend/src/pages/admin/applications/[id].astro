@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm';
 
 import AdminNav from '../../../components/AdminNav.astro';
 import { db, talentApplications } from '../../../db';
-import { ensureCsrfToken } from '../../../lib/csrf';
 import { isUuid } from '../../../lib/ids';
 import '../../../styles/admin.css';
 
@@ -11,7 +10,7 @@ import '../../../styles/admin.css';
 // check is defensive, not a second auth boundary.
 const user = Astro.locals.user;
 if (!user) {
-  return Astro.redirect('/admin/login');
+  return new Response('Forbidden', { status: 403 });
 }
 
 // `talent_applications.id` is a Postgres `uuid` column — validate the
@@ -29,7 +28,6 @@ if (!application) {
   return Astro.redirect('/admin/applications');
 }
 
-const csrfToken = ensureCsrfToken(Astro.cookies);
 const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 ---
 
@@ -42,7 +40,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', ti
   </head>
   <body>
     <div class="admin-shell">
-      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <AdminNav email={user.email} />
       <a class="admin-back-link" href="/admin/applications">← Back to applications</a>
       <h1>{application.name}</h1>
       <div class="admin-detail">

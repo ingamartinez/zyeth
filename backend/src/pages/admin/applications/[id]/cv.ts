@@ -10,9 +10,10 @@ import { getUploadsDir } from '../../../../lib/uploads';
 
 // Authenticated CV download for a single talent application (#31). Lives
 // under /admin/* so src/middleware.ts guards it automatically — an
-// unauthenticated request 302s to /admin/login and never reaches this
-// handler. Do NOT move this under /api/* (that surface is deliberately
-// public/unauthenticated for #28's submission endpoints).
+// unauthenticated request gets a 403 from the middleware (#52: Cloudflare
+// Access JWT verification) and never reaches this handler. Do NOT move
+// this under /api/* (that surface is deliberately public/unauthenticated
+// for #28's submission endpoints).
 
 // Strips control characters (CR/LF header-injection) and characters that
 // would break out of a quoted filename="..." value. `cvOriginalName` is

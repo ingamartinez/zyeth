@@ -3,19 +3,16 @@ import { sql } from 'drizzle-orm';
 
 import AdminNav from '../../components/AdminNav.astro';
 import { db, leads, talentApplications } from '../../db';
-import { ensureCsrfToken } from '../../lib/csrf';
 import '../../styles/admin.css';
 
-// Guarded by src/middleware.ts — Astro.locals.user is always set by the
-// time this page renders (the guard redirects to /admin/login
-// otherwise). The check below is just defensive/type-narrowing, not a
-// second auth boundary.
+// Guarded by src/middleware.ts (#52) — Astro.locals.user is always set by
+// the time this page renders (the guard 403s otherwise, since there is no
+// app-level login page to redirect to anymore). The check below is just
+// defensive/type-narrowing, not a second auth boundary.
 const user = Astro.locals.user;
 if (!user) {
-  return Astro.redirect('/admin/login');
+  return new Response('Forbidden', { status: 403 });
 }
-
-const csrfToken = ensureCsrfToken(Astro.cookies);
 
 // Simple totals for the landing cards — no filtering, just "how many
 // rows exist" as an at-a-glance count. The real lists (with search +
@@ -37,7 +34,7 @@ const [{ value: applicationsCount }] = await db
   </head>
   <body>
     <div class="admin-shell">
-      <AdminNav email={user.email} csrfToken={csrfToken} />
+      <AdminNav email={user.email} />
       <h1>Dashboard</h1>
       <div class="admin-card-row">
         <div class="admin-card">
