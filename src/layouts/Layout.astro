@@ -16,7 +16,7 @@ const t = useTranslations(lang);
 const {
   title = `${t("site.name")} — ${t("site.tagline")}`,
   description = t("site.tagline"),
-  image = "/logo-mark.svg",
+  image = "/og-default.png",
 } = Astro.props;
 
 const site = Astro.site ?? new URL("https://zyeth.work");
@@ -39,6 +39,8 @@ const alternates = (Object.keys(languages) as Array<keyof typeof languages>).map
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#124944" />
 
     <title>{title}</title>
     <meta name="description" content={description} />
