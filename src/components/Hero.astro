@@ -459,9 +459,10 @@ const chips = [
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 0.78rem;
-    /* #3f7d2e on #e4f3d8 was 4.33:1, under 4.5:1 (WCAG AA, #13). The
-       on-light teal token clears 4.97:1 against this same pill bg. */
-    color: var(--color-brand-teal-text);
+    /* #3f7d2e on #e4f3d8 was 4.33:1, under 4.5:1 (WCAG AA, #13). Stays
+       green (savings semantic) rather than teal — the darkened
+       --color-brand-green-text token clears 6.27:1 against this pill bg. */
+    color: var(--color-brand-green-text);
     background: #e4f3d8;
     padding: 3px 8px;
     border-radius: 7px;

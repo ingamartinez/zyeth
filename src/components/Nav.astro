@@ -164,8 +164,33 @@ const isActive = (href: string) =>
     menu.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && menu.open) {
         menu.open = false;
+        // Don't rely on the toggle listener re-firing for a programmatic
+        // `.open` assignment (cross-browser dispatch of `toggle` on
+        // scripted changes is inconsistent) — un-inert explicitly (#13).
+        setInert(false);
         summary?.focus();
       }
     });
+
+    // The mobile <details> is hidden via CSS (`lg:hidden`) but its JS
+    // `open` state is independent of viewport width. If the menu is open
+    // and the viewport crosses into the desktop (`lg`) range, the
+    // <details> becomes display:none while still `open`, so no `toggle`
+    // event fires and `inert` is never removed from the desktop nav — it
+    // stays permanently inert until reload. Watch the same breakpoint
+    // Tailwind uses for `lg` (default theme, no override in global.css:
+    // 64rem / 1024px) and force-close + un-inert directly on crossing in,
+    // without depending on `toggle` to re-fire (#13).
+    const desktopMediaQuery = window.matchMedia("(min-width: 1024px)");
+    const handleViewportChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        // Force-close and un-inert directly on every crossing into desktop,
+        // regardless of prior `open` state — un-inerting is idempotent, and
+        // this guarantees the page is never left inert (#13).
+        menu.open = false;
+        setInert(false);
+      }
+    };
+    desktopMediaQuery.addEventListener("change", handleViewportChange);
   }
 </script>
