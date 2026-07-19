@@ -162,6 +162,74 @@ To enable prod later:
 4. Confirm `admin.zyeth.work` / Caddy routing for prod (tracked
    separately in #34, alongside staging).
 
+## Static site Caddy vhosts (#16)
+
+The marketing site (repo root, Astro SSG) is served directly by Caddy as
+static files — no upstream process. Its three vhosts are versioned in
+`backend/deploy/caddy/static.zyeth.work.caddy` and are a **byte-for-byte
+copy of the blocks running in `/etc/caddy/Caddyfile`** on the droplet
+(verified against the live host, not reconstructed from memory):
+
+- `zyeth.work` — apex, `root * /srv/zyeth/prod/current` + `file_server`
+  (the `main`-branch deploy target).
+- `www.zyeth.work` — permanent redirect to the apex (canonical host is the
+  bare apex).
+- `staging.zyeth.work` — `root * /srv/zyeth/staging/current` + `file_server`
+  (the `staging`-branch deploy target).
+
+All three use the CF-issued Origin CA cert (`/etc/caddy/zyeth-origin.pem` +
+`.key`), **not** Let's Encrypt: the origin is Cloudflare-proxied (Full
+strict), so an ACME challenge to it would fail. This matches the admin
+block below and the other sites on this shared droplet (findash,
+photoshowcase).
+
+### Where it lives / how to apply
+
+There is no single committed `Caddyfile` — the droplet's
+`/etc/caddy/Caddyfile` is **assembled from per-project blocks** (findash,
+photoshowcase, then Zyeth's static blocks, then the admin block). This repo
+versions only Zyeth's blocks; it does not own the other projects' vhosts.
+
+To rebuild or re-apply Zyeth's static serving layer (disaster recovery or a
+droplet migration), as **root** (the CI `deploy` user's sudoers entries do
+**not** include caddy reload/restart):
+
+```sh
+# 1. Back up the live Caddyfile first — it is shared with other sites.
+cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak
+
+# 2. Ensure the CF origin cert/key are in place (issued once, 15yr):
+#    /etc/caddy/zyeth-origin.pem  (0644 root:root)
+#    /etc/caddy/zyeth-origin.key  (0640 root:caddy)
+
+# 3. Paste the contents of backend/deploy/caddy/static.zyeth.work.caddy
+#    into /etc/caddy/Caddyfile (and the admin block below, if serving the
+#    backend too), then validate BEFORE reloading:
+caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+
+# 4. Reload and confirm it actually took (not stuck "reloading"):
+systemctl reload caddy
+systemctl is-active caddy    # must print "active"
+```
+
+The `validate` step is mandatory: this is a **shared** Caddy instance, so a
+syntax error would take down findash and photoshowcase too, not just Zyeth.
+See the § Admin subdomain `log`-file-ownership gotcha below — it applies to
+any Zyeth block that writes an access log.
+
+### Cloudflare (out of scope here, DR note)
+
+DNS records and proxy mode for `zyeth.work` live in the Cloudflare
+dashboard, not on the droplet, so they are not versioned in this repo and
+cannot be verified from source — confirm the exact record set in the CF
+dashboard before relying on it for a migration. Per the admin runbook below
+(which describes the zyeth records as "proxied … same as the other zyeth
+records", SSL/TLS **Full (strict)**), the expected shape is: `zyeth.work`,
+`www.zyeth.work`, and `staging.zyeth.work` each pointing at the droplet IP,
+all **proxied** (orange cloud), under **Full (strict)**. The `www → apex`
+redirect itself is handled by Caddy (the `redir` block above), not by DNS —
+DNS only has to get `www` to the origin.
+
 ## Admin subdomain (admin.zyeth.work) — #34
 
 The backend has no public URL of its own — until now it was only reachable
