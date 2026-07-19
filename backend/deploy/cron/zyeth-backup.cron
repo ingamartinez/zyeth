@@ -1,0 +1,18 @@
+# zyeth-backup — daily pg_dump + uploads tar at 03:45 UTC (runs as zyeth user).
+#
+# Staggered 30 min off findash's 03:15 UTC dump to avoid IO contention on
+# the shared 2-core/2GB droplet (multiple projects' backups running at once
+# would compete for disk + CPU).
+#
+# Install: cp backend/deploy/cron/zyeth-backup.cron /etc/cron.d/zyeth-backup
+# Permissions: chmod 0644 /etc/cron.d/zyeth-backup (owned root:root)
+#
+# Logs: /srv/zyeth-backend/<env>/backups/backup.log
+#
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+45 3 * * * zyeth /usr/local/bin/zyeth-backup.sh staging
+
+# Uncomment once prod is provisioned (own DB role, own /etc/zyeth-backend/prod.env):
+# 45 3 * * * zyeth /usr/local/bin/zyeth-backup.sh prod

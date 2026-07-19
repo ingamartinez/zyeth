@@ -212,6 +212,99 @@ droplet are **operator steps**, run outside this repo/CI. This repo only
 carries the versioned Caddy block (`backend/deploy/caddy/admin.zyeth.work.caddy`)
 that gets appended.
 
+## Database + uploads backups (#35)
+
+Daily `pg_dump` of the database plus a `tar` of the CV uploads directory,
+with local retention. Runs as the `zyeth` OS user via cron, mirroring the
+findash droplet's existing backup pattern (`findash-backup.sh` /
+`/etc/cron.d/findash-backup`) but scoped to local backups only — off-site
+sync (e.g. R2) is a future enhancement, not part of #35.
+
+The script never hardcodes credentials: it sources `DATABASE_URL` and
+`UPLOADS_DIR` from the same `/etc/zyeth-backend/<env>.env` file the systemd
+unit uses (see § One-time provisioning above), so it fails loudly if either
+is missing rather than falling back to a guessed connection string or path.
+
+### 1. Install (one-time, per environment)
+
+As root:
+
+```sh
+cp backend/deploy/backup/zyeth-backup.sh /usr/local/bin/
+chmod 0755 /usr/local/bin/zyeth-backup.sh
+
+cp backend/deploy/cron/zyeth-backup.cron /etc/cron.d/zyeth-backup
+chmod 0644 /etc/cron.d/zyeth-backup
+chown root:root /etc/cron.d/zyeth-backup
+```
+
+The cron file runs `staging` at 03:45 UTC — deliberately staggered 30
+minutes off findash's 03:15 UTC dump to avoid IO contention on the shared
+2-core/2GB droplet. Once `prod` is provisioned (its own DB role and its own
+`/etc/zyeth-backend/prod.env`, per § Prod: intentionally deferred above),
+uncomment the `@prod` line in the installed cron file.
+
+### 2. Manual run
+
+```sh
+sudo -u zyeth /usr/local/bin/zyeth-backup.sh staging
+```
+
+Output and every prune action are appended to
+`/srv/zyeth-backend/staging/backups/backup.log`. The backup dir itself
+(`/srv/zyeth-backend/staging/backups/`) is created on first run with mode
+`0750`, owned by `zyeth`.
+
+### 3. Restore procedure (verifying a dump is actually restorable)
+
+This is what makes the DoD's "restorable dumps" real — a dump that was
+never test-restored is just an unverified file. As a host operator with
+Postgres superuser access:
+
+```sh
+# Pick the dump to verify, e.g. the most recent:
+DUMP=/srv/zyeth-backend/staging/backups/zyeth-staging-db-<timestamp>.sql.gz
+
+# 1. Restore into a scratch DB — never the live staging DB.
+createdb -U postgres zyeth_restore_check
+gunzip -c "$DUMP" | psql -U postgres -d zyeth_restore_check
+
+# 2. Sanity-check the restore — row counts on a couple of known tables,
+#    e.g. talent applications and client leads:
+psql -U postgres -d zyeth_restore_check -c "\dt"
+psql -U postgres -d zyeth_restore_check -c "SELECT count(*) FROM talent_applications;"
+
+# 3. Drop the scratch DB once satisfied:
+dropdb -U postgres zyeth_restore_check
+```
+
+For the uploads archive, list its contents to confirm it's a valid,
+non-empty tar (or a valid empty one, if uploads is currently empty):
+
+```sh
+tar -tzf /srv/zyeth-backend/staging/backups/zyeth-staging-uploads-<timestamp>.tar.gz
+```
+
+### 4. Retention
+
+The script keeps the 14 most recent backups of **each** artifact type
+(`zyeth-<env>-db-*.sql.gz` and `zyeth-<env>-uploads-*.tar.gz`), pruned
+independently on every run — a quiet uploads dir doesn't cause DB dumps to
+be pruned early or vice versa. `LOCAL_KEEP` is a variable at the top of
+`zyeth-backup.sh` if the retention window needs to change later.
+
+Prod backup is a one-liner once its env file exists: uncomment the `@prod`
+line in the installed `/etc/cron.d/zyeth-backup` (no script changes
+needed — the script already takes the environment as its first argument).
+
+### 5. What's a CI step vs. an operator step
+
+Everything above — installing the script/cron file on the droplet, running
+a manual backup, and running the restore-verification procedure — is
+**host-operator work**, done by hand outside this repo's CI, same category
+as the rest of this runbook's one-time provisioning steps. This repo only
+carries the versioned script, cron file, and this procedure.
+
 ## Env var contract (reminder)
 
 The full contract — `DATABASE_URL`, `UPLOADS_DIR`, `MAX_CV_BYTES`,
