@@ -20,6 +20,11 @@
   --color-brand-green: #124944;
   --color-brand-green-dark: #0a2a25;
   --color-brand-teal: #2bafa3;
+  /* On-light text variant of brand-teal — #2bafa3 fails 4.5:1 on white/surface
+     (2.70:1 / 2.53:1). #15726a clears ≥4.5:1 on white, --color-surface, AND
+     the Hero "Save" pill's light-green bg. Do NOT use for on-dark contexts —
+     brand-teal itself already passes there (see AGENTS.md WCAG AA pass, #13). */
+  --color-brand-teal-text: #15726a;
   --color-brand-lime: #88b33f;
   --color-brand-gold: #f0c71d;
 

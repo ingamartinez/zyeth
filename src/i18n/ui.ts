@@ -25,6 +25,9 @@ export const ui = {
     "nav.menu": "Menu",
     "nav.langLabel": "Language",
 
+    // Shared — accessibility
+    "a11y.skipToContent": "Skip to main content",
+
     "footer.tagline": "Curated Colombian talent for US teams. Operations & logistics, on US time.",
     "footer.explore": "Explore",
     "footer.connect": "Connect",
@@ -317,6 +320,9 @@ export const ui = {
     "nav.cta": "Agendá una llamada",
     "nav.menu": "Menú",
     "nav.langLabel": "Idioma",
+
+    // Compartido — accesibilidad
+    "a11y.skipToContent": "Saltar al contenido principal",
 
     "footer.tagline": "Talento colombiano curado para equipos de EE. UU. Operaciones y logística, en horario de EE. UU.",
     "footer.explore": "Explorar",

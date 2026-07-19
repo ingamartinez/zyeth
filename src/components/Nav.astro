@@ -57,7 +57,6 @@ const isActive = (href: string) =>
         <button
           type="button"
           class="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-near-white/80 transition-colors hover:text-near-white group-focus-within:text-near-white"
-          aria-haspopup="true"
         >
           {t("nav.resources")}
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -89,10 +88,11 @@ const isActive = (href: string) =>
       </Button>
     </div>
 
-    <!-- Mobile menu (native disclosure, no JS) -->
-    <details class="group relative lg:hidden">
+    <!-- Mobile menu (native disclosure; a tiny inline script below manages
+         focus containment while open — see script block at the end). -->
+    <details id="mobile-menu" class="group relative lg:hidden">
       <summary
-        class="flex cursor-pointer list-none items-center rounded-full p-2 text-near-white/90 [&::-webkit-details-marker]:hidden"
+        class="flex cursor-pointer list-none items-center rounded-full p-2.5 text-near-white/90 [&::-webkit-details-marker]:hidden"
         aria-label={t("nav.menu")}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -128,3 +128,44 @@ const isActive = (href: string) =>
     </details>
   </div>
 </header>
+
+<script>
+  // Mobile menu focus containment (WCAG 2.4.3, #13). The mobile menu is a
+  // no-JS <details>/<summary> disclosure; without this, Tab can leave the
+  // open panel and land on inert-looking content behind it. Scoped to
+  // #mobile-menu only — does NOT touch the desktop "Resources" hover/focus
+  // disclosure, which is a separate <div> with no <details> element.
+  const menu = document.getElementById("mobile-menu");
+  if (menu instanceof HTMLDetailsElement) {
+    const summary = menu.querySelector("summary");
+    const header = menu.closest("header");
+
+    const setInert = (isOpen: boolean) => {
+      // Everything else in the page (main content, footer, ...).
+      for (const el of document.body.children) {
+        if (el !== header) {
+          if (isOpen) el.setAttribute("inert", "");
+          else el.removeAttribute("inert");
+        }
+      }
+      // Sibling header content (brand link, desktop nav, language/CTA
+      // cluster) that sits next to the <details> in the DOM.
+      if (menu.parentElement) {
+        for (const el of menu.parentElement.children) {
+          if (el === menu) continue;
+          if (isOpen) el.setAttribute("inert", "");
+          else el.removeAttribute("inert");
+        }
+      }
+    };
+
+    menu.addEventListener("toggle", () => setInert(menu.open));
+
+    menu.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && menu.open) {
+        menu.open = false;
+        summary?.focus();
+      }
+    });
+  }
+</script>
