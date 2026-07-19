@@ -38,6 +38,12 @@ export const leadSchema = z.object({
   phone: trimmedOptional(50),
   role: trimmedRequired('role is required', 200),
   expectedRate: trimmedOptional(100),
+  // Intentionally left uncapped here (unlike every other field above):
+  // it's bounded transitively by the /leads request body cap (#48,
+  // MAX_LEAD_BODY_BYTES in pages/api/leads.ts) instead of by zod. Adding
+  // `.max()` would turn an oversized-but-under-body-cap honeypot into a
+  // 400 validation error, which breaks the anti-bot trap — a filled
+  // honeypot must still fall through to the silent fake-201 path.
   [HONEYPOT_FIELD]: z.string().optional(),
 });
 
@@ -51,6 +57,9 @@ export const applicationFieldsSchema = z.object({
   email: email('email must be a valid address'),
   roleExperience: trimmedRequired('roleExperience is required', 5000),
   englishLevel: trimmedRequired('englishLevel is required', 100),
+  // Uncapped for the same reason as leadSchema's honeypot: bounded
+  // transitively (here by the 5MB multipart cap in lib/uploads.ts), kept
+  // uncapped in zod so the fake-201 anti-bot trap still fires (#48).
   [HONEYPOT_FIELD]: z.string().optional(),
 });
 

@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 
 import { db, leads } from '../../db';
+import { readBoundedText } from '../../lib/body';
 import { handlePreflight, jsonResponse } from '../../lib/cors';
 import { notifyNewSubmission } from '../../lib/notify';
 import { checkRateLimit, getClientIp } from '../../lib/rate-limit';
@@ -9,6 +10,12 @@ import { formatZodErrors, HONEYPOT_FIELD, leadSchema } from '../../lib/validatio
 // Public contact-form submission endpoint. See src/lib/{validation,cors,
 // rate-limit}.ts for the shared allowlist/limiter/schema logic — this
 // file is intentionally a thin wiring layer.
+
+// A real lead is well under 1KB of content (name 200 + email 254 +
+// phone 50 + role 200 + rate 100 + JSON overhead). 16KB gives generous
+// headroom over that while still killing payload-abuse/memory-during-
+// parse attempts on this public, unauthenticated endpoint (#48).
+const MAX_LEAD_BODY_BYTES = 16 * 1024;
 
 export const OPTIONS: APIRoute = handlePreflight;
 
@@ -22,9 +29,18 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     );
   }
 
+  const bodyText = await readBoundedText(request, MAX_LEAD_BODY_BYTES);
+  if (bodyText === null) {
+    return jsonResponse(
+      { ok: false, errors: [{ field: '(root)', message: 'Request body too large' }] },
+      413,
+      request,
+    );
+  }
+
   let payload: unknown;
   try {
-    payload = await request.json();
+    payload = JSON.parse(bodyText);
   } catch {
     return jsonResponse(
       { ok: false, errors: [{ field: '(root)', message: 'Invalid JSON body' }] },
