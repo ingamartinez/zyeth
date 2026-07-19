@@ -1,0 +1,42 @@
+# ── Zyeth — static site fronted by Cloudflare (Full strict) ──────────────────
+# CF-issued Origin CA cert (15yr). DO NOT enable Caddy's Let's Encrypt: the host
+# is proxied by Cloudflare, so the ACME challenge to this origin would fail.
+# Static: no upstream process — Caddy serves files directly.
+#   /etc/caddy/zyeth-origin.pem (0644 root:root)
+#   /etc/caddy/zyeth-origin.key (0640 root:caddy)
+#   staging branch -> /srv/zyeth/staging/current   (staging.zyeth.work)
+#   main    branch -> /srv/zyeth/prod/current      (zyeth.work, www -> apex)
+
+staging.zyeth.work {
+	tls /etc/caddy/zyeth-origin.pem /etc/caddy/zyeth-origin.key
+	root * /srv/zyeth/staging/current
+	encode zstd gzip
+	file_server
+	log {
+		output file /var/log/caddy/zyeth-staging-access.log {
+			roll_size 50mb
+			roll_keep 7
+		}
+		format json
+	}
+}
+
+# www -> apex redirect (canonical host is the bare apex).
+www.zyeth.work {
+	tls /etc/caddy/zyeth-origin.pem /etc/caddy/zyeth-origin.key
+	redir https://zyeth.work{uri} permanent
+}
+
+zyeth.work {
+	tls /etc/caddy/zyeth-origin.pem /etc/caddy/zyeth-origin.key
+	root * /srv/zyeth/prod/current
+	encode zstd gzip
+	file_server
+	log {
+		output file /var/log/caddy/zyeth-prod-access.log {
+			roll_size 50mb
+			roll_keep 7
+		}
+		format json
+	}
+}
