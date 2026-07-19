@@ -162,6 +162,56 @@ To enable prod later:
 4. Confirm `admin.zyeth.work` / Caddy routing for prod (tracked
    separately in #34, alongside staging).
 
+## Admin subdomain (admin.zyeth.work) — #34
+
+The backend has no public URL of its own — until now it was only reachable
+at `127.0.0.1:3400` on the droplet. `admin.zyeth.work` exposes the admin
+dashboard (and the SSR app generally) publicly, fronted by Cloudflare
+Access so identity is gated at the edge, in front of the app's own argon2
+`/admin` login (defense in depth, not a replacement — see `backend/README.md`
+§ Admin auth for the app-level login).
+
+This is **one-time host-operator provisioning**, same category as the
+steps in § One-time provisioning above — none of it is automated by CI,
+and none of it is part of this repo's deploy pipeline.
+
+1. **Cloudflare DNS**: add an `A` record `admin.zyeth.work` →
+   `<droplet IP>`, **proxied** (orange cloud), same as the other zyeth
+   records. SSL/TLS mode stays **Full (strict)** — unchanged.
+2. **Cloudflare Access**: create a self-hosted Access application for
+   `admin.zyeth.work` with a policy that **allows only the client's
+   identity** (email allowlist) and blocks everyone else. This is the
+   actual identity gate — it runs before any request reaches Caddy or the
+   app.
+3. **Caddy**: append `backend/deploy/caddy/admin.zyeth.work.caddy` to the
+   droplet's `/etc/caddy/Caddyfile` (as **root** — the `deploy` user's
+   sudoers entries from § One-time provisioning above do **not** include
+   caddy reload/restart). Back up the Caddyfile first. Then, before
+   reloading:
+   ```sh
+   caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+   systemctl reload caddy
+   ```
+   The `validate` step is mandatory, not optional — this is a **shared**
+   Caddy instance serving findash and photoshowcase too, so a syntax error
+   in the appended block would take down every site on the host, not just
+   admin.zyeth.work.
+4. **Verify**:
+   - `curl -I https://admin.zyeth.work` returns a valid TLS handshake and
+     an app response (through the CF Access redirect for an unauthenticated
+     request).
+   - An unauthenticated browser hitting `https://admin.zyeth.work` lands on
+     the Cloudflare Access identity gate first, before ever seeing the
+     app's own `/admin` login.
+   - `zyeth.work`, `www.zyeth.work`, `staging.zyeth.work`, findash, and
+     photoshowcase are all unaffected — confirm each still serves normally
+     after the reload.
+
+The DNS record, the Access policy, and the actual `caddy reload` on the
+droplet are **operator steps**, run outside this repo/CI. This repo only
+carries the versioned Caddy block (`backend/deploy/caddy/admin.zyeth.work.caddy`)
+that gets appended.
+
 ## Env var contract (reminder)
 
 The full contract — `DATABASE_URL`, `UPLOADS_DIR`, `MAX_CV_BYTES`,

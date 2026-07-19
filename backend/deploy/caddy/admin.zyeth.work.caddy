@@ -1,0 +1,22 @@
+# ── Zyeth admin — SSR backend behind Cloudflare Access ───────────────────────
+# admin.zyeth.work → reverse_proxy to the staging backend SSR process (:3400).
+# TLS via the existing *.zyeth.work CF origin cert (wildcard covers admin — no
+# new cert). Cloudflare Access gates identity at the edge BEFORE the app's own
+# /admin login. DO NOT enable Let's Encrypt (CF-proxied origin, ACME would fail).
+# The prod static blocks (zyeth.work, www, staging.zyeth.work) stay untouched.
+admin.zyeth.work {
+	tls /etc/caddy/zyeth-origin.pem /etc/caddy/zyeth-origin.key
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3400 {
+		header_up Host {host}
+		header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+		header_up X-Forwarded-Proto https
+	}
+	log {
+		output file /var/log/caddy/zyeth-admin-access.log {
+			roll_size 50mb
+			roll_keep 7
+		}
+		format json
+	}
+}
